@@ -4,8 +4,8 @@
   - Discord: rfboldeanu@gmail.com
   - Mail: florilian
 - Schiopu Andrei
-  - Discord:
-  - Mail:
+  - Discord: andreis_96327
+  - Mail: andreischiopu22@gmail.com
 - Brinza Gabriel
   - Discord: gabi.b_
   - Mail: gabrielbrinza83@gmail.com
