@@ -10,8 +10,8 @@
   - Discord: gabi.b_
   - Mail: gabrielbrinza83@gmail.com
 - Call Laurentiu Stefan
-  - Discord:
-  - Mail:
+  - Discord: laur99
+  - Mail: laurentiu.call99@gmail.com
 - Pantiru Dragos
   - Discord:
   - Mail:
