@@ -31,13 +31,15 @@ Make a list and some details about each.
 
 5. Accessibility Standards and Evaluation Methods
 
-Accessibility standards provide guidelines for developing applications that can be used by people with different disabilities. The Web Content Accessibility Guidelines (WCAG), developed by the World Wide Web Consortium (W3C), focus on making digital content perceivable, operable, understandable, and robust. Following these principles can improve compatibility with screen readers and keyboard navigation.
+Accessibility standards provide guidelines for designing digital applications that can be used by people with different disabilities. The Web Content Accessibility Guidelines (WCAG) 2.2, developed by the World Wide Web Consortium (W3C), organize accessibility requirements around four principles: perceivable, operable, understandable, and robust. For an educational application designed for visually impaired students, relevant requirements include keyboard accessibility, sufficient color contrast, meaningful heading structures, descriptive labels for interactive elements, and compatibility with screen readers. These guidelines help developers identify potential barriers and establish measurable accessibility requirements.
 
-Accessibility evaluation should combine automated testing with feedback from real users. Automated tools can identify issues such as missing labels and insufficient color contrast, while usability testing can reveal difficulties that automated checks may overlook. For this project, testing should focus on whether visually impaired students can upload PDFs, listen to extracted text, understand generated summaries, and navigate flashcards independently.
+Accessibility evaluation should combine automated testing with manual verification. Tools such as WAVE and axe-core can identify common accessibility issues, including missing accessible names, certain color contrast problems, and incorrect use of accessibility attributes. WAVE provides visual feedback about potential issues on web pages, while axe-core can be integrated into automated testing workflows. However, automated tools cannot identify every accessibility problem or determine whether an application is easy to use in practice. Manual testing is therefore necessary to verify keyboard navigation, logical focus order, screen reader announcements, and the accessibility of interactive components.
 
-Relevant evaluation resources include WAVE, an accessibility evaluation tool, and axe-core, an automated accessibility testing library. These tools can help identify technical issues, but testing with visually impaired users remains essential for assessing the application's practical usability.
+For the proposed application, accessibility testing should cover the main learning activities, including uploading PDF documents, listening to extracted text, accessing AI-generated summaries, and navigating flashcards. Each activity should be evaluated to determine whether it can be completed independently using a keyboard and a screen reader, such as NVDA. Additional checks should verify that text remains readable when enlarged, interface elements have clear labels, and feedback messages are accessible to assistive technologies. These tests can reveal usability barriers that automated evaluation may overlook.
 
-Ai prompt (ChatGPT): What accessibility standards and evaluation methods should we consider when developing an educational application for visually impaired students? Research existing guidelines, tools, and testing methods that could help us ensure the application is accessible and easy to use.
+Evaluation results can be documented using a checklist based on relevant WCAG success criteria. Useful measures include the number and severity of accessibility issues identified, the proportion of essential tasks completed successfully, and the difficulties encountered during testing. Where feasible, involving visually impaired students in usability studies can provide valuable feedback about navigation, clarity, and independence. Combining standards-based evaluation, automated tools, manual testing, and user feedback provides a more comprehensive assessment of the application's accessibility and helps guide future improvements.
+
+Ai prompt (ChatGPT): Research accessibility standards and evaluation methods for an educational application designed for visually impaired students. Identify relevant guidelines, tools, and testing approaches, and explain how they can help ensure that students can use the application independently. Include practical recommendations for evaluating accessibility.
 
 # References and Useful Resources
 
@@ -78,14 +80,17 @@ https://apps.ankiweb.net/
 
 Section 5 – Accessibility Standards and Evaluation Methods
 
-Accessibility guidelines – WCAG  
-https://www.w3.org/WAI/standards-guidelines/wcag/
+World Wide Web Consortium (W3C). Web Content Accessibility Guidelines (WCAG) 2.2. 
+https://www.w3.org/TR/WCAG22/
 
-Accessibility testing – WAVE  
+WebAIM. WAVE Web Accessibility Evaluation Tools. 
 https://wave.webaim.org/
 
-Automated testing – axe-core  
+Deque Systems. axe-core: Accessibility Testing Engine. 
 https://github.com/dequelabs/axe-core
+
+NV Access. NVDA — NonVisual Desktop Access. 
+https://www.nvaccess.org/
 
 Evaluation guidelines – W3C  
 https://www.w3.org/WAI/test-evaluate/
