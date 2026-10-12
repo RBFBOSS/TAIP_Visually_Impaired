@@ -1,0 +1,38 @@
+State of the Art: Accessible Learning for Visually Impaired Students
+
+1. Existing Solutions and Research
+
+Assistive technologies such as screen readers, text-to-speech (TTS) systems, and accessible digital documents help visually impaired students access educational materials. However, accessibility remains a challenge due to poorly structured PDFs, missing alternative text, and incompatibility with assistive technologies.
+
+Kerdar, Bächler, and Kirchhoff (2024), in their scoping review on digital accessibility, identified several barriers affecting people with visual impairments. Similarly, Lomellini et al. (2025), in a review of accessible online learning in higher education, highlighted the need for inclusive educational content and better compatibility with assistive technologies.
+
+2. Artificial Intelligence in Education
+
+Artificial intelligence (AI) and large language models (LLMs) offer new opportunities for accessible learning. AI can summarize lengthy documents and generate flashcards containing questions and answers, helping students review important concepts more efficiently. Combined with text-to-speech technology, these features allow visually impaired learners to listen to educational content and study without relying on visual interfaces.
+
+However, AI-generated content may contain errors or omit important information. Therefore, summaries and flashcards should remain grounded in the original document and be checked for accuracy.
+
+3. Proposed Approach and Evaluation
+
+The proposed application combines PDF text extraction, text-to-speech, AI-powered summarization, and automatic flashcard generation in one accessible web/mobile platform. PDF documents containing scanned pages may require optical character recognition (OCR), while the interface should support keyboard navigation, screen readers, clear labels, and accessible controls, following the Web Content Accessibility Guidelines (WCAG).
+
+The application can be evaluated through functional tests, accessibility checks, and usability studies involving visually impaired students. Relevant criteria include text-extraction accuracy, summary quality, flashcard relevance, and ease of use.
+
+In conclusion, the project builds on existing assistive technologies and AI-based learning tools to provide a more integrated study experience. Its goal is to help visually impaired students access educational materials independently and revise information more efficiently.
+
+References and Useful Resources
+
+Kerdar, S. H., Bächler, L., & Kirchhoff, B. M. (2024). Research on digital accessibility for people with visual impairments.
+https://link.springer.com/article/10.1007/s10791-024-09460-7
+
+Lomellini, A., Lowenthal, P. R., Snelson, C., et al. (2025). Accessible and inclusive online learning in higher education.
+https://link.springer.com/article/10.1007/s12528-024-09424-2
+
+World Wide Web Consortium (W3C). Web Content Accessibility Guidelines (WCAG).
+https://www.w3.org/WAI/standards-guidelines/wcag/
+
+OpenAI API. Documentation for integrating AI-powered summarization and flashcard generation.
+https://platform.openai.com/docs
+
+NVDA. Free screen reader for Windows accessibility testing.
+https://www.nvaccess.org/
