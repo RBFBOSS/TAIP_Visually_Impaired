@@ -26,6 +26,9 @@ Several existing tools provide useful features for visually impaired students. N
 
 NaturalReader is another example of text-to-speech software that allows users to listen to digital documents. In addition, platforms such as Anki support flashcard-based learning and spaced repetition, helping students review information over time. Integrating similar capabilities into one accessible application could reduce the need to switch between multiple tools when studying.
 
+AI promt (Gemini): what existing assistive software and educational tools are available for visually empaired students learning?
+Make a list and some details about each.
+
 5. Accessibility Standards and Evaluation Methods
 
 Accessibility standards provide guidelines for developing applications that can be used by people with different disabilities. The Web Content Accessibility Guidelines (WCAG), developed by the World Wide Web Consortium (W3C), focus on making digital content perceivable, operable, understandable, and robust. Following these principles can improve compatibility with screen readers and keyboard navigation.
