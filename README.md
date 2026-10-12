@@ -1,8 +1,8 @@
 # Education for visually impaired students
 ## 1. Members and contact
 - Boldeanu Razvan:
-  - Discord:
-  - Mail:
+  - Discord: rfboldeanu@gmail.com
+  - Mail: florilian
 - Schiopu Andrei
   - Discord:
   - Mail:
