@@ -1,6 +1,6 @@
 # Education for visually impaired students
 ## 1. Members and contact
-- Boldeanu Razvan:
+- **Boldeanu Razvan**(SCRUM):
   - Discord: florilian
   - Mail: rfboldeanu@gmail.com
 - Schiopu Andrei
