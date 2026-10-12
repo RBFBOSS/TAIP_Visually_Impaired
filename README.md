@@ -16,7 +16,7 @@
   - Discord:
   - Mail:
 - Zaharia Iulian
-  - Discord:
-  - Mail:
+  - Discord: zaheu
+  - Mail: iulian.zaharia@student.uaic.ro
 ## 2. Coordinator
 - Adrian Iftene
