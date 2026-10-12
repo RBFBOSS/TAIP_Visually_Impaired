@@ -20,19 +20,67 @@ The application can be evaluated through functional tests, accessibility checks,
 
 In conclusion, the project builds on existing assistive technologies and AI-based learning tools to provide a more integrated study experience. Its goal is to help visually impaired students access educational materials independently and revise information more efficiently.
 
-References and Useful Resources
+4. Existing Assistive Software and Educational Tools
 
-Kerdar, S. H., Bächler, L., & Kirchhoff, B. M. (2024). Research on digital accessibility for people with visual impairments.
+Several existing tools provide useful features for visually impaired students. NVDA and JAWS are screen readers that convert on-screen information into speech, while Microsoft Immersive Reader offers reading support and accessibility features. These technologies help users navigate digital content, but they do not necessarily combine document summarization and automatic flashcard generation in a single workflow.
+
+NaturalReader is another example of text-to-speech software that allows users to listen to digital documents. In addition, platforms such as Anki support flashcard-based learning and spaced repetition, helping students review information over time. Integrating similar capabilities into one accessible application could reduce the need to switch between multiple tools when studying.
+
+5. Accessibility Standards and Evaluation Methods
+
+Accessibility standards provide guidelines for developing applications that can be used by people with different disabilities. The Web Content Accessibility Guidelines (WCAG), developed by the World Wide Web Consortium (W3C), focus on making digital content perceivable, operable, understandable, and robust. Following these principles can improve compatibility with screen readers and keyboard navigation.
+
+Accessibility evaluation should combine automated testing with feedback from real users. Automated tools can identify issues such as missing labels and insufficient color contrast, while usability testing can reveal difficulties that automated checks may overlook. For this project, testing should focus on whether visually impaired students can upload PDFs, listen to extracted text, understand generated summaries, and navigate flashcards independently.
+
+Relevant evaluation resources include WAVE, an accessibility evaluation tool, and axe-core, an automated accessibility testing library. These tools can help identify technical issues, but testing with visually impaired users remains essential for assessing the application's practical usability.
+
+# References and Useful Resources
+
+Section 1 – Existing Solutions and Research
+
+Research article – Kerdar et al. (2024)
 https://link.springer.com/article/10.1007/s10791-024-09460-7
 
-Lomellini, A., Lowenthal, P. R., Snelson, C., et al. (2025). Accessible and inclusive online learning in higher education.
+Research article – Lomellini et al. (2025)  
 https://link.springer.com/article/10.1007/s12528-024-09424-2
 
-World Wide Web Consortium (W3C). Web Content Accessibility Guidelines (WCAG).
-https://www.w3.org/WAI/standards-guidelines/wcag/
+Section 2 – Artificial Intelligence in Education
 
-OpenAI API. Documentation for integrating AI-powered summarization and flashcard generation.
+AI documentation – OpenAI API  
 https://platform.openai.com/docs
 
-NVDA. Free screen reader for Windows accessibility testing.
+Section 3 – Proposed Approach and Evaluation
+
+Accessibility standards – WCAG  
+https://www.w3.org/WAI/standards-guidelines/wcag/
+
+Section 4 – Existing Assistive Software and Educational Tools
+
+Screen reader – NVDA  
 https://www.nvaccess.org/
+
+Screen reader – JAWS  
+https://www.freedomscientific.com/products/software/jaws/
+
+Reading assistance – Microsoft Immersive Reader  
+https://www.microsoft.com/en-us/education/products/learning-tools
+
+Text-to-speech – NaturalReader  
+https://www.naturalreaders.com/
+
+Flashcard learning – Anki  
+https://apps.ankiweb.net/
+
+Section 5 – Accessibility Standards and Evaluation Methods
+
+Accessibility guidelines – WCAG  
+https://www.w3.org/WAI/standards-guidelines/wcag/
+
+Accessibility testing – WAVE  
+https://wave.webaim.org/
+
+Automated testing – axe-core  
+https://github.com/dequelabs/axe-core
+
+Evaluation guidelines – W3C  
+https://www.w3.org/WAI/test-evaluate/
