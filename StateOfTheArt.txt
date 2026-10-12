@@ -37,6 +37,8 @@ Accessibility evaluation should combine automated testing with feedback from rea
 
 Relevant evaluation resources include WAVE, an accessibility evaluation tool, and axe-core, an automated accessibility testing library. These tools can help identify technical issues, but testing with visually impaired users remains essential for assessing the application's practical usability.
 
+Ai prompt (ChatGPT): What accessibility standards and evaluation methods should we consider when developing an educational application for visually impaired students? Research existing guidelines, tools, and testing methods that could help us ensure the application is accessible and easy to use.
+
 # References and Useful Resources
 
 Section 1 – Existing Solutions and Research
