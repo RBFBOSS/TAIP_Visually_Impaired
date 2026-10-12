@@ -66,12 +66,37 @@ Importantly, voice must be an alternative interaction method, not the only metho
 
 4. Existing Assistive Software and Educational Tools
 
-Several existing tools provide useful features for visually impaired students. NVDA and JAWS are screen readers that convert on-screen information into speech, while Microsoft Immersive Reader offers reading support and accessibility features. These technologies help users navigate digital content, but they do not necessarily combine document summarization and automatic flashcard generation in a single workflow.
+Assistive software and educational tools for visually impaired students span several categories—from foundational operating system screen readers to specialized digital libraries and learning platforms. The primary tools available in this space include:
 
-NaturalReader is another example of text-to-speech software that allows users to listen to digital documents. In addition, platforms such as Anki support flashcard-based learning and spaced repetition, helping students review information over time. Integrating similar capabilities into one accessible application could reduce the need to switch between multiple tools when studying.
+a. Screen Readers & Core Navigation Software
+Screen readers convert text, menus, and UI elements into synthesized speech or refreshable Braille output, acting as the primary gateway to computers and mobile devices.
+- JAWS (Job Access With Speech): The most widely used commercial screen reader for Windows. It offers advanced web scripting, deep enterprise and LMS (Canvas, Blackboard) integration, and robust support for Braille displays.
+- NVDA (NonVisual Desktop Access):  A free, open-source screen reader for Windows. Powered by a global community, it provides robust speech and Braille support and serves as a primary tool for students and schools with limited budgets.
+- VoiceOver: Apple’s built-in, gesture-driven screen reader integrated directly into macOS, iOS, and iPadOS. It is heavily utilized in education due to the prevalence of iPads and Macbooks in modern classrooms.
 
-AI promt (Gemini): what existing assistive software and educational tools are available for visually empaired students learning?
-Make a list and some details about each.
+b. Spaced Repetition & Flashcard Platforms
+Anki: A powerful, open-source spaced repetition flashcard program widely used by university students for long-term memorization. While immensely popular, its default accessibility for blind users heavily depends on screen-reader keyboard shortcuts, third-party add-ons (like AnkiAccessibility), and platform-specific quirks—making custom, native accessibility a major design hurdle for students with visual impairments.
+
+c. Accessible Libraries & Textbook Repositories
+Because standard textbooks are often locked in inaccessible PDFs or physical print, specialized digital libraries format textbooks into accessible digital text, structured audio, and Braille.
+- Bookshare: A massive global digital library for individuals with print disabilities. It provides textbooks, novels, and academic papers in accessible formats like structured EPUB, DAISY, and ready-to-print Braille files.
+- Learning Ally: An educational library specializing in human-narrated audiobooks tailored for students with print and visual disabilities, offering synchronized text-and-audio features.
+- DAISY Consortium Formats: An international standard for digital talking books, allowing users to navigate complex academic textbooks by chapter, section, page number, and footnote.
+
+d. Specialized Educational Platforms & Apps
+- Accessibyte: An accessible online learning suite specifically built for blind and visually impaired students. It features custom-designed apps for typing, learning, and practicing curriculum topics with high-contrast visuals, large text, and built-in screen reading.
+- Voice Dream Reader: A popular mobile and desktop reading app designed for print-disabled learners. It turns documents, PDFs, and eBooks into high-quality spoken audio with advanced speed controls, synchronized highlighting, and custom formatting.
+
+Integrating similar capabilities into one accessible application could reduce the need to switch between multiple tools when studying.
+a. From Anki (Spaced Repetition & FSRS)
+What to use: Adopt FSRS (Free Spaced Repetition Scheduler) as your underlying scheduling engine (via libraries like ts-fsrs), rather than inventing your own algorithm or using older models like SM-2.
+Why it helps: Anki's community has proven that data-driven scheduling works, but Anki itself is notoriously difficult for blind users to navigate natively. Building FSRS into an accessibility-first voice interface gives you the pedagogical power of Anki without the accessibility barriers.
+
+b. From NVDA & VoiceOver (Screen Reader Patterns)
+What to use: Study how these platform screen readers handle keyboard-only navigation, landmark roles, and ARIA live regions, and incorporate those patterns into your Next.js frontend using React Aria Components.
+Why it helps: You don't need to write a screen reader from scratch, but your app must respect them. Designing your UI primitives to cooperate with (or step aside for) native screen readers prevents the audio "cacophony" issue where the app's voice and the user's screen reader talk over each other simultaneously. 
+
+
 
 5. Accessibility Standards and Evaluation Methods
 
