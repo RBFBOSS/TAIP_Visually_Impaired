@@ -14,11 +14,55 @@ However, AI-generated content may contain errors or omit important information. 
 
 3. Proposed Approach and Evaluation
 
-The proposed application combines PDF text extraction, text-to-speech, AI-powered summarization, and automatic flashcard generation in one accessible web/mobile platform. PDF documents containing scanned pages may require optical character recognition (OCR), while the interface should support keyboard navigation, screen readers, clear labels, and accessible controls, following the Web Content Accessibility Guidelines (WCAG).
+An AI-powered educational application for visually impaired students can improve access to learning materials by transforming PDF documents into accessible summaries, generating interactive flashcards, and enabling students to interact with educational content using voice commands.
+The application should be designed around four fundamental principles:
+1. Accessibility: Students should be able to navigate and use the application without relying on vision.
+2. Educational effectiveness: AI-generated summaries and flashcards should help students understand, memorize, and review educational material.
+3. Accuracy and reliability: AI-generated information must be consistent with the original learning materials.
+4. Usability: The application should be intuitive, efficient, and comfortable for students with different levels of visual impairment and technical experience.
 
-The application can be evaluated through functional tests, accessibility checks, and usability studies involving visually impaired students. Relevant criteria include text-extraction accuracy, summary quality, flashcard relevance, and ease of use.
+Recommended technologies
+Component	Possible technologies	Purpose
+Frontend	React, Next.js, Flutter	Accessible user interface
+Backend	Python FastAPI, Django, Node.js	Application logic and API integration
+PDF processing	PyMuPDF, pdfplumber	Extract document text
+OCR	Tesseract, cloud document OCR	Read scanned PDF documents
+AI summarization	GPT models, open-source LLMs	Generate educational summaries
+Flashcard generation	LLM with structured JSON output	Create questions and answers
+Speech-to-text	Whisper, platform speech APIs	Convert spoken commands into text
+Text-to-speech	Web Speech API, native TTS	Read educational content aloud
+Database	PostgreSQL, SQLite	Store documents, flashcards, and progress
+Accessibility testing	axe-core, NVDA, VoiceOver	Evaluate accessibility
 
-In conclusion, the project builds on existing assistive technologies and AI-based learning tools to provide a more integrated study experience. Its goal is to help visually impaired students access educational materials independently and revise information more efficiently.
+Approach 1: User-centered and participatory design
+The application should be developed with direct involvement from visually impaired students, teachers, and accessibility specialists.
+Key activities include interviewing students about learning challenges, observing how they use screen readers, creating accessible prototypes, and refining features based on feedback.
+Students who are blind and students with low vision may have different requirements. For example, some may prefer audio navigation, while others may benefit from magnification, high contrast, and adjustable text sizes.
+
+Approach 2: AI-based PDF summarization
+Recommended techniques:
+- Use extractive summarization for selecting important passages and abstractive summarization for simpler explanations.
+- Use retrieval-augmented generation (RAG) to ground generated content in extracted document passages.
+- Preserve page numbers and headings so students can navigate back to the original source.
+- Detect missing text, unreadable scanned pages, and poorly extracted tables.
+- Provide different summary lengths: short, medium, and detailed.
+
+Approach 3: AI-generated flashcards
+The flashcard module should convert educational content into structured question-and-answer pairs.
+Flashcards should support audio playback, keyboard navigation, difficulty levels, spaced repetition, and student-controlled editing.
+Generated answers should be validated against source passages before they are included in a study set.
+
+Approach 4: Voice-based interaction
+Voice interaction can combine speech recognition, intent recognition, and speech synthesis.
+A student could say:
+- "Summarize chapter three."
+- "Read the next paragraph."
+- "Generate five flashcards."
+- "Repeat the question."
+- "Explain this concept in simpler language."
+The system processes the spoken instruction, identifies the intended action, retrieves the appropriate content, and provides an audio response.
+Voice functionality should include adjustable speech speed, pause and resume controls, confirmation for destructive actions, and recovery from misunderstood commands.
+Importantly, voice must be an alternative interaction method, not the only method. All essential functions should also work through screen readers and keyboards.
 
 4. Existing Assistive Software and Educational Tools
 
