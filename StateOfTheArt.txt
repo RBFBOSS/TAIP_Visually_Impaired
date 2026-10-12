@@ -8,7 +8,7 @@ Kerdar, Bächler, and Kirchhoff (2024), in their scoping review on digital acces
 
 2. Artificial Intelligence in Education
 
-Artificial intelligence (AI) and large language models (LLMs) offer new opportunities for accessible learning. AI can summarize lengthy documents and generate flashcards containing questions and answers, helping students review important concepts more efficiently. Combined with text-to-speech technology, these features allow visually impaired learners to listen to educational content and study without relying on visual interfaces.
+State-of-the-art large language models (LLMs) have significantly advanced educational accessibility by automating the summarization of dense academic documents and generating interactive study aids, such as custom flashcards. When integrated with advanced neural text-to-speech (TTS) engines, these AI systems allow visually impaired students to consume complex content and execute active recall drills entirely through auditory channels, bypassing the need for traditional graphical interfaces. However, because generative models are susceptible to hallucinations, modern accessible platforms must employ rigorous verification protocols to ensure all dynamically generated materials remain strictly grounded in the original source text. Ultimately, this multimodal convergence of summarization, generation, and auditory synthesis fosters total independent learning for visually impaired students.
 
 However, AI-generated content may contain errors or omit important information. Therefore, summaries and flashcards should remain grounded in the original document and be checked for accuracy.
 
