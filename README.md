@@ -20,3 +20,6 @@
   - Mail: iulian.zaharia@student.uaic.ro
 ## 2. Coordinator
 - Adrian Iftene
+## 3. Repository and tasks
+- https://github.com/RBFBOSS/TAIP_Visually_Impaired/blob/main/
+- https://trello.com/b/4N9ZHd5c/taip
