@@ -1,0 +1,171 @@
+
+@startuml
+title Level 4 - Document Processing & AI Generation
+
+top to bottom direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam roundcorner 8
+skinparam nodesep 35
+skinparam ranksep 45
+
+hide circle
+hide empty members
+
+' ==========================================
+' DOCUMENT DOMAIN
+' ==========================================
+
+package "1. Document Domain" #EAF3FF {
+
+    enum ProcessingStatus {
+        UPLOADED
+        PROCESSING
+        COMPLETED
+        FAILED
+    }
+
+    class Document <<Entity>> {
+        +id: UUID
+        +filename: String
+        +status: ProcessingStatus
+        +uploadedAt: DateTime
+        --
+        +updateStatus(status: ProcessingStatus): void
+    }
+
+    class DocumentSection <<Entity>> {
+        +id: UUID
+        +heading: String
+        +content: Text
+        +pageNumber: Integer
+        +chunkIndex: Integer
+    }
+
+    abstract class Summary <<Entity>> {
+        +id: UUID
+        +content: Text
+        +createdAt: DateTime
+    }
+
+    class GlobalSummary <<Entity>>
+
+    class SectionSummary <<Entity>>
+}
+
+' ==========================================
+' PROCESSING SERVICES
+' ==========================================
+
+package "2. Document Processing" #EAF9ED {
+
+    class DocumentService <<Service>> {
+        +uploadDocument(file: File): Document
+        +processDocument(id: UUID): void
+        +getStatus(id: UUID): ProcessingStatus
+    }
+
+    class DocumentParser <<Service>> {
+        +extractStructure(file: File): List
+        +normalizeDiacritics(text: String): String
+    }
+
+    class DocumentChunker <<Service>> {
+        +createSections(content: List): List
+    }
+
+    interface PDFExtractor {
+        +extract(file: File): List
+    }
+
+    class DoclingAdapter <<Adapter>> {
+        +extract(file: File): List
+    }
+}
+
+' ==========================================
+' AI GENERATION SERVICES
+' ==========================================
+
+package "3. AI Generation" #FFF4E5 {
+
+    class SummaryService <<Service>> {
+        +generateSectionSummary(sectionId: UUID): SectionSummary
+        +generateGlobalSummary(documentId: UUID): GlobalSummary
+        +optimizeForAudio(text: String): String
+    }
+
+    class FlashcardGenerator <<Service>> {
+        +generateDrafts(sectionId: UUID): List
+        +attachCitations(cards: List): List
+    }
+
+    interface LLMGateway {
+        +generate(prompt: String): String
+    }
+
+    class LiteLLMAdapter <<Adapter>> {
+        +generate(prompt: String): String
+    }
+
+    class GeneratedFlashcard <<DTO>> {
+        +question: String
+        +answer: String
+        +sourcePage: Integer
+        +sourceSectionId: UUID
+    }
+}
+
+' ==========================================
+' DOCUMENT RELATIONSHIPS
+' ==========================================
+
+Document "1" *-- "0..*" DocumentSection : contains
+
+Document "1" *-- "0..1" GlobalSummary : has
+
+DocumentSection "1" *-- "0..1" SectionSummary : has
+
+Summary <|-- GlobalSummary
+Summary <|-- SectionSummary
+
+' ==========================================
+' INTERFACE IMPLEMENTATIONS
+' ==========================================
+
+PDFExtractor <|.. DoclingAdapter
+
+LLMGateway <|.. LiteLLMAdapter
+
+' ==========================================
+' SERVICE DEPENDENCIES
+' ==========================================
+
+DocumentService ..> DocumentParser : uses
+DocumentService ..> DocumentChunker : uses
+
+DocumentParser ..> PDFExtractor : delegates
+
+DocumentChunker ..> DocumentSection : creates
+
+SummaryService ..> LLMGateway : requests summaries
+
+FlashcardGenerator ..> LLMGateway : requests questions
+
+FlashcardGenerator ..> GeneratedFlashcard : produces
+
+' ==========================================
+' LAYOUT OPTIMIZATION
+' ==========================================
+
+Document -[hidden]right- DocumentSection
+
+DocumentParser -[hidden]right- DocumentChunker
+
+SummaryService -[hidden]right- FlashcardGenerator
+
+@enduml

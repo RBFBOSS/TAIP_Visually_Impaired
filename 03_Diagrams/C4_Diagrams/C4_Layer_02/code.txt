@@ -1,0 +1,66 @@
+
+@startuml
+
+!include <C4/C4_Container>
+
+title C4 Level 2 - Accessible Study Application
+
+LAYOUT_LEFT_RIGHT()
+
+' =====================================
+' ACTORS
+' =====================================
+
+Person(student, "Visually Impaired Student", "Studies using voice, keyboard, or assistive technology.")
+
+Person(teacher, "Teacher / Evaluator", "Reviews flashcards, source citations, and accessibility.")
+
+' =====================================
+' APPLICATION BOUNDARY
+' =====================================
+
+System_Boundary(studyApp, "Accessible Study Application") {
+
+    Container(frontend, "Web Application", "Next.js / React", "Accessible interface, document upload, summaries, flashcards, and study sessions.")
+
+    Container(voice, "Browser Voice Interface", "Web Speech API", "SpeechRecognition for commands and speechSynthesis for audio feedback.")
+
+    Container(api, "Backend API", "FastAPI / Python", "Handles document processing, AI generation, flashcard management, and study progress.")
+
+    ContainerDb(database, "Application Database", "PostgreSQL", "Stores documents, sections, summaries, flashcards, citations, and review history.")
+
+}
+
+' =====================================
+' EXTERNAL SYSTEM
+' =====================================
+
+System_Ext(llmProvider, "External LLM Provider", "Generates summaries and flashcards using AI.")
+
+' =====================================
+' USER INTERACTIONS
+' =====================================
+
+Rel(student, frontend, "Uploads documents and studies", "HTTPS / Browser")
+
+Rel(teacher, frontend, "Reviews and approves flashcards", "HTTPS / Browser")
+
+' =====================================
+' FRONTEND COMMUNICATION
+' =====================================
+
+Rel(frontend, voice, "Recognizes voice commands and produces speech", "Browser API")
+
+Rel(frontend, api, "Uploads PDFs, requests summaries, manages study sessions", "HTTPS / JSON")
+
+Rel(api, frontend, "Streams document processing progress", "SSE")
+
+' =====================================
+' BACKEND COMMUNICATION
+' =====================================
+
+Rel(api, database, "Reads and writes application data", "SQL")
+
+Rel(api, llmProvider, "Requests AI-generated summaries and flashcards", "HTTPS via LiteLLM")
+
+@enduml

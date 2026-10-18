@@ -1,0 +1,198 @@
+
+@startuml
+title Level 4 - Study Sessions, FSRS & Progress
+
+top to bottom direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam roundcorner 8
+skinparam nodesep 35
+skinparam ranksep 45
+
+hide circle
+hide empty members
+
+' ==========================================
+' 1. STUDY DOMAIN
+' ==========================================
+
+package "1. Study Domain" #EAF3FF {
+
+    class User <<Entity>> {
+        +id: UUID
+        +role: String
+    }
+
+    class ReviewSession <<Entity>> {
+        +id: UUID
+        +userId: UUID
+        +startedAt: DateTime
+        +endedAt: DateTime
+        +status: SessionStatus
+        --
+        +endSession(): void
+    }
+
+    class ReviewLog <<Entity>> {
+        +id: UUID
+        +flashcardId: UUID
+        +rating: RecallRating
+        +responseLatencyMs: Integer
+        +reviewedAt: DateTime
+    }
+
+    enum RecallRating {
+        AGAIN
+        HARD
+        GOOD
+        EASY
+    }
+
+    enum SessionStatus {
+        ACTIVE
+        COMPLETED
+        INTERRUPTED
+    }
+
+    class Flashcard <<Reference>> {
+        +id: UUID
+        +question: String
+        +answer: String
+        +approvalStatus: ApprovalStatus
+    }
+}
+
+' ==========================================
+' 2. FSRS SCHEDULING
+' ==========================================
+
+package "2. FSRS Scheduling" #EAF9ED {
+
+    enum FSRSCardState {
+        NEW
+        LEARNING
+        REVIEW
+        RELEARNING
+    }
+
+    class FSRSState <<Entity>> {
+        +id: UUID
+        +userId: UUID
+        +flashcardId: UUID
+        +state: FSRSCardState
+        +stability: Float
+        +difficulty: Float
+        +dueAt: DateTime
+        +lastReview: DateTime
+        +repetitions: Integer
+        +lapses: Integer
+    }
+
+    class FSRSService <<Service>> {
+        +getDueCards(userId: UUID): List
+        +scheduleReview(userId: UUID, cardId: UUID, rating: RecallRating): FSRSState
+        +getNextReview(cardId: UUID): DateTime
+    }
+
+    interface FSRSScheduler {
+        +calculateNextReview(state: FSRSState, rating: RecallRating): FSRSState
+    }
+
+    class FSRSAdapter <<Adapter>> {
+        +calculateNextReview(state: FSRSState, rating: RecallRating): FSRSState
+    }
+}
+
+' ==========================================
+' 3. STUDY & PROGRESS SERVICES
+' ==========================================
+
+package "3. Study & Progress Services" #FFF4E5 {
+
+    class StudyService <<Service>> {
+        +startSession(userId: UUID): ReviewSession
+        +getNextCard(sessionId: UUID): Flashcard
+        +submitGrade(sessionId: UUID, cardId: UUID, rating: RecallRating, latencyMs: Integer): ReviewLog
+        +stopSession(sessionId: UUID): void
+    }
+
+    class ProgressService <<Service>> {
+        +getUserProgress(userId: UUID): ProgressReport
+        +calculateRecallMetrics(userId: UUID): Map
+        +generateFeedback(userId: UUID): List
+    }
+
+    class ProgressReport <<DTO>> {
+        +totalReviews: Integer
+        +dueCards: Integer
+        +averageLatencyMs: Float
+        +generatedAt: DateTime
+    }
+
+    class LearningFeedback <<DTO>> {
+        +level: FeedbackLevel
+        +message: String
+    }
+
+    enum FeedbackLevel {
+        TASK
+        PROCESS
+        SELF_REGULATION
+    }
+}
+
+' ==========================================
+' 4. DOMAIN ASSOCIATIONS
+' ==========================================
+
+User "1" -- "0..*" ReviewSession : starts
+
+ReviewLog "0..*" --> "1" Flashcard : reviews
+
+User "1" -- "0..*" FSRSState : maintains
+
+Flashcard "1" -- "0..*" FSRSState : scheduling records
+
+' ==========================================
+' 5. COMPOSITION
+' ==========================================
+
+ReviewSession "1" *-- "0..*" ReviewLog : contains
+
+ProgressReport "1" *-- "0..*" LearningFeedback : includes
+
+' ==========================================
+' 6. INTERFACE REALIZATION
+' ==========================================
+
+FSRSScheduler <|.. FSRSAdapter
+
+' ==========================================
+' 7. SERVICE DEPENDENCIES
+' ==========================================
+
+StudyService ..> ReviewSession : manages
+StudyService ..> ReviewLog : records
+StudyService ..> FSRSService : schedules reviews
+
+FSRSService ..> FSRSState : updates
+FSRSService ..> FSRSScheduler : delegates
+
+ProgressService ..> ReviewLog : analyzes
+ProgressService ..> FSRSState : reads
+ProgressService ..> ProgressReport : generates
+
+' ==========================================
+' 8. LAYOUT HINTS
+' ==========================================
+
+User -[hidden]right- ReviewSession
+ReviewLog -[hidden]right- Flashcard
+FSRSService -[hidden]right- FSRSState
+StudyService -[hidden]right- ProgressService
+
+@enduml

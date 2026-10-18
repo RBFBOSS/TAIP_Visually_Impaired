@@ -1,0 +1,40 @@
+
+@startuml
+
+!include <C4/C4_Context>
+
+title C4 Level 1 - Accessible Study Application
+
+LAYOUT_LEFT_RIGHT()
+
+' =====================================
+' ACTORS
+' =====================================
+
+Person(student, "Visually Impaired Student", "Uploads PDFs, listens to summaries, and studies flashcards using voice or keyboard.")
+
+Person(teacher, "Teacher / Evaluator", "Reviews AI-generated flashcards, verifies citations, and evaluates accessibility.")
+
+' =====================================
+' MAIN SOFTWARE SYSTEM
+' =====================================
+
+System(studyApp, "Accessible Study Application", "Accessible web platform for PDF processing, AI summaries, flashcards, and spaced repetition.")
+
+' =====================================
+' EXTERNAL SYSTEM
+' =====================================
+
+System_Ext(llmProvider, "External LLM Provider", "Generates summaries and draft flashcards using AI.")
+
+' =====================================
+' RELATIONSHIPS
+' =====================================
+
+Rel(student, studyApp, "Uploads documents and studies flashcards", "Browser / Voice / Keyboard")
+
+Rel(teacher, studyApp, "Reviews and approves flashcards", "Browser")
+
+Rel(studyApp, llmProvider, "Requests AI-generated content", "HTTPS API")
+
+@enduml

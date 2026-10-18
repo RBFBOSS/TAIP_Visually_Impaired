@@ -1,0 +1,174 @@
+
+@startuml
+title Level 4 - Flashcard Management & Approval
+
+top to bottom direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam roundcorner 8
+skinparam nodesep 35
+skinparam ranksep 45
+
+hide circle
+hide empty members
+
+' ==========================================
+' FLASHCARD DOMAIN
+' ==========================================
+
+package "1. Flashcard Domain" #EAF3FF {
+
+    enum ApprovalStatus {
+        DRAFT
+        APPROVED
+        REJECTED
+    }
+
+    class Deck <<Entity>> {
+        +id: UUID
+        +documentId: UUID
+        +title: String
+        +createdAt: DateTime
+        --
+        +getApprovedCards(): List
+    }
+
+    class Flashcard <<Entity>> {
+        +id: UUID
+        +question: String
+        +answer: String
+        +status: ApprovalStatus
+        +createdAt: DateTime
+        +updatedAt: DateTime
+        --
+        +approve(): void
+        +reject(): void
+        +edit(question: String, answer: String): void
+    }
+
+    class Citation <<Entity>> {
+        +id: UUID
+        +sectionId: UUID
+        +pageNumber: Integer
+        +sourceExcerpt: String
+        --
+        +getSourceReference(): String
+    }
+}
+
+' ==========================================
+' APPROVAL SERVICES
+' ==========================================
+
+package "2. Flashcard Management" #EAF9ED {
+
+    class FlashcardService <<Service>> {
+        +createDraft(data: GeneratedFlashcard): Flashcard
+        +getDrafts(deckId: UUID): List
+        +approveCard(cardId: UUID): Flashcard
+        +rejectCard(cardId: UUID): Flashcard
+        +editCard(cardId: UUID, question: String, answer: String): Flashcard
+        +approveAll(deckId: UUID): Integer
+    }
+
+    class CitationValidator <<Service>> {
+        +validateCitation(card: Flashcard): Boolean
+        +verifySource(citation: Citation): Boolean
+    }
+
+    class DeckService <<Service>> {
+        +createDeck(documentId: UUID): Deck
+        +getDeck(deckId: UUID): Deck
+        +getApprovedCards(deckId: UUID): List
+    }
+
+    interface FlashcardRepository {
+        +save(card: Flashcard): Flashcard
+        +findById(id: UUID): Flashcard
+        +findDrafts(deckId: UUID): List
+        +saveAll(cards: List): void
+    }
+
+    class PostgreSQLFlashcardRepository <<Repository>> {
+        +save(card: Flashcard): Flashcard
+        +findById(id: UUID): Flashcard
+        +findDrafts(deckId: UUID): List
+        +saveAll(cards: List): void
+    }
+}
+
+' ==========================================
+' REFERENCES FROM OTHER COMPONENTS
+' ==========================================
+
+package "3. External Domain References" #FFF4E5 {
+
+    class DocumentSection <<Reference>> {
+        +id: UUID
+        +heading: String
+        +pageNumber: Integer
+    }
+
+    class GeneratedFlashcard <<DTO>> {
+        +question: String
+        +answer: String
+        +sourcePage: Integer
+        +sourceSectionId: UUID
+    }
+}
+
+' ==========================================
+' DOMAIN RELATIONSHIPS
+' ==========================================
+
+' Shared aggregation:
+' Assumes cards can exist independently
+' from the deck grouping.
+
+Deck "1" o-- "0..*" Flashcard : groups
+
+' Composition:
+' Citations belong to their flashcard.
+
+Flashcard "1" *-- "1..*" Citation : owns
+
+' Association:
+' Citations reference document sections.
+
+Citation "0..*" --> "1" DocumentSection : references
+
+' ==========================================
+' INTERFACE REALIZATION
+' ==========================================
+
+FlashcardRepository <|.. PostgreSQLFlashcardRepository
+
+' ==========================================
+' SERVICE DEPENDENCIES
+' ==========================================
+
+FlashcardService ..> Flashcard : manages
+FlashcardService ..> CitationValidator : validates
+FlashcardService ..> FlashcardRepository : persists
+FlashcardService ..> GeneratedFlashcard : consumes
+
+CitationValidator ..> Citation : checks
+
+DeckService ..> Deck : manages
+DeckService ..> FlashcardRepository : reads cards
+
+' ==========================================
+' LAYOUT HINTS
+' ==========================================
+
+Deck -[hidden]right- Flashcard
+
+FlashcardService -[hidden]right- CitationValidator
+
+CitationValidator -[hidden]right- DeckService
+
+@enduml
