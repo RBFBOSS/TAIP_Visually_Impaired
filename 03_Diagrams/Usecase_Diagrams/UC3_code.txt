@@ -1,0 +1,38 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Visually Impaired Student" as Student
+actor "ts-fsrs Scheduler" as FSRS <<Internal Engine>>
+actor "PostgreSQL DB" as DB <<Database>>
+
+package "Voice Study Session Loop" {
+  usecase "Execute Study Session" as UC_Study
+  usecase "Read Flashcard Front" as UC_ReadFront
+  usecase "Reveal Flashcard Back" as UC_Reveal
+  usecase "Grade Recall Performance" as UC_Grade
+  usecase "Update Scheduling Interval" as UC_Update
+  usecase "Provide End-of-Session Summary" as UC_End
+
+  usecase "Grade as 'Easy'" as UC_GradeEasy
+  usecase "Grade as 'Hard'" as UC_GradeHard
+  
+  Student --> UC_Study
+  
+  UC_Study ..> UC_ReadFront : <<include>>
+  UC_ReadFront ..> UC_Reveal : <<include>> (Triggered by user command)
+  UC_Reveal ..> UC_Grade : <<include>>
+  
+  ' Use case generalization for grading options
+  UC_Grade <|-- UC_GradeEasy
+  UC_Grade <|-- UC_GradeHard
+  
+  UC_Grade ..> UC_Update : <<include>>
+  UC_Update ..> UC_Study : <<include>> (Loop back to next card)
+  
+  UC_Study <.. UC_End : <<extend>> (If queue is empty)
+
+  UC_Update --> FSRS
+  UC_Update --> DB
+}
+@enduml

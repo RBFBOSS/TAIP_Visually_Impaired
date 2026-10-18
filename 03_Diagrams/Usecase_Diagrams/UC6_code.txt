@@ -1,0 +1,42 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+' Actor Generalization (Bonus Point)
+actor "Reviewer" as Reviewer
+actor "Visually Impaired Student" as Student
+actor "Teacher / Evaluator" as Teacher
+Student --|> Reviewer
+Teacher --|> Reviewer
+
+actor "PostgreSQL DB" as DB <<Database>>
+
+package "Human-in-the-Loop (HITL) Dashboard" {
+  usecase "Access Review Dashboard" as UC_Access
+  usecase "Read Draft Card Content" as UC_ReadDraft
+  usecase "Evaluate Draft Card" as UC_Evaluate
+  usecase "Approve Card" as UC_Approve
+  usecase "Reject/Delete Card" as UC_Reject
+  usecase "Edit Draft Text" as UC_Edit
+  usecase "Apply Bulk Batch Approval" as UC_BulkApprove
+
+  Reviewer --> UC_Access
+  Reviewer --> UC_Evaluate
+  
+  UC_Access ..> UC_ReadDraft : <<include>>
+  UC_Evaluate ..> UC_ReadDraft : <<include>>
+  
+  ' Use case generalization for evaluation actions
+  UC_Evaluate <|-- UC_Approve
+  UC_Evaluate <|-- UC_Reject
+  UC_Evaluate <|-- UC_Edit
+  
+  UC_Edit ..> UC_Approve : <<include>> (Editing forces an approval)
+  
+  UC_Access <.. UC_BulkApprove : <<extend>> (Triggered explicitly by reviewer)
+  
+  UC_Approve --> DB : Updates state to 'approved'
+  UC_Reject --> DB : Soft-deletes record
+  UC_BulkApprove --> DB : Batch UPDATE query
+}
+@enduml

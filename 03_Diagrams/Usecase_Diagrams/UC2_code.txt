@@ -1,0 +1,35 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Visually Impaired Student" as Student
+actor "LiteLLM API" as LLM <<External Service>>
+actor "Web Audio Engine" as Audio <<Browser Engine>>
+
+package "Audio Summary Subsystem" {
+  usecase "Listen to Document Summary" as UC_Listen
+  usecase "Generate Audio-Optimized Text" as UC_Generate
+  usecase "Synthesize Speech" as UC_Synthesize
+  
+  usecase "Control Playback" as UC_Control
+  usecase "Skip Forward" as UC_Skip
+  usecase "Pause/Resume" as UC_Pause
+  usecase "Replay Current Section" as UC_Replay
+
+  Student --> UC_Listen
+  Student --> UC_Control
+  
+  UC_Listen ..> UC_Generate : <<include>>
+  UC_Generate ..> UC_Synthesize : <<include>>
+  
+  ' Generalization (Inheritance) for specific control commands
+  UC_Control <|-- UC_Skip
+  UC_Control <|-- UC_Pause
+  UC_Control <|-- UC_Replay
+  
+  UC_Listen <.. UC_Control : <<extend>> (Triggered by voice/keyboard during playback)
+
+  UC_Generate --> LLM
+  UC_Synthesize --> Audio
+}
+@enduml

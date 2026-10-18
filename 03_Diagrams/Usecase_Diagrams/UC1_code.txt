@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Visually Impaired Student" as Student
+actor "Docling Parser" as Docling <<External System>>
+actor "Web Speech TTS" as TTS <<External API>>
+
+package "Document Ingestion Subsystem" {
+  usecase "Upload Course PDF" as UC_Upload
+  usecase "Select File via Picker" as UC_SelectFile
+  usecase "Process PDF Document" as UC_Process
+  usecase "Extract Structured Text" as UC_Extract
+  usecase "Normalize Romanian Diacritics" as UC_Clean
+  usecase "Handle Unreadable/Scanned PDF" as UC_Error
+  usecase "Announce Success/Failure" as UC_Announce
+
+  Student --> UC_Upload
+  
+  UC_Upload ..> UC_SelectFile : <<include>>
+  UC_Upload ..> UC_Process : <<include>>
+  
+  UC_Process ..> UC_Extract : <<include>>
+  UC_Extract ..> UC_Clean : <<include>>
+  UC_Clean ..> UC_Announce : <<include>>
+  
+  UC_Extract <.. UC_Error : <<extend>> (If OCR confidence is low)
+  UC_Error ..> UC_Announce : <<include>>
+  
+  UC_Extract --> Docling
+  UC_Announce --> TTS
+}
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Teacher / Evaluator" as Teacher
+
+package "System Evaluation & Audit Interface" {
+  usecase "Evaluate System Prototype" as UC_Evaluate
+  usecase "Inspect AI Output Quality" as UC_InspectAI
+  usecase "Verify Source Citations" as UC_VerifyCitation
+  usecase "Check for LLM Hallucinations" as UC_CheckHallucination
+  
+  usecase "Test Accessibility Modalities" as UC_TestA11y
+  usecase "Toggle Screen-Reader Mode" as UC_ToggleSR
+  usecase "Toggle Self-Voicing Mode" as UC_ToggleSV
+  usecase "Toggle High-Contrast Mode" as UC_ToggleHC
+
+  Teacher --> UC_Evaluate
+  
+  UC_Evaluate ..> UC_InspectAI : <<include>>
+  UC_Evaluate ..> UC_TestA11y : <<include>>
+  
+  UC_InspectAI ..> UC_VerifyCitation : <<include>>
+  UC_InspectAI <.. UC_CheckHallucination : <<extend>> (If data seems suspicious)
+  
+  UC_TestA11y <.. UC_ToggleSR : <<extend>>
+  UC_TestA11y <.. UC_ToggleSV : <<extend>>
+  UC_TestA11y <.. UC_ToggleHC : <<extend>>
+}
+@enduml

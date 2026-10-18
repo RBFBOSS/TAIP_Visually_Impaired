@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Visually Impaired Student" as Student
+actor "SpeechRecognition API" as STT <<Browser Engine>>
+actor "OS File System" as OS <<External System>>
+
+package "Voice-Activated Ingestion Subsystem" {
+  usecase "Initiate Upload via Voice" as UC_VoiceTrigger
+  usecase "Recognize Speech Intent" as UC_Recognize
+  usecase "Play Audio Earcon" as UC_Earcon
+  usecase "Trigger Hidden File Picker" as UC_TriggerPicker
+  usecase "Handle Invalid File Format" as UC_HandleFormatError
+
+  Student --> UC_VoiceTrigger
+  
+  UC_VoiceTrigger ..> UC_Recognize : <<include>>
+  UC_Recognize ..> UC_Earcon : <<include>>
+  UC_Recognize ..> UC_TriggerPicker : <<include>>
+  
+  UC_TriggerPicker --> OS
+  UC_Recognize --> STT
+  
+  UC_TriggerPicker <.. UC_HandleFormatError : <<extend>> (If selected file is not PDF)
+  
+  usecase "Fallback to Keyboard Upload" as UC_Fallback
+  UC_VoiceTrigger <.. UC_Fallback : <<extend>> (If microphone is unavailable)
+}
+@enduml
