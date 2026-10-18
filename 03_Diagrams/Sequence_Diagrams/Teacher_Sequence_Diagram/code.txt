@@ -1,0 +1,43 @@
+@startuml
+title Sequence Diagram - Teacher / Evaluator Workflow
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+hide footbox
+
+autonumber
+
+actor "Teacher / Evaluator" as teacher
+participant "Web Application\n[Next.js / React]" as frontend
+participant "API Controllers\n[FastAPI Routers]" as routes
+participant "Flashcard Management\n[Service & CitationValidator]" as approval
+database "Application Database\n[PostgreSQL]" as db
+
+== 1. Load Draft Flashcards ==
+teacher -> frontend : Open Review Dashboard (select Deck)
+frontend -> routes : GET /decks/{deckId}/drafts
+routes -> approval : getDrafts(deckId)
+approval -> db : SELECT draft flashcards & citations
+db --> approval : Draft cards + page/section citations
+approval --> routes : Draft flashcards list
+routes --> frontend : 200 OK (Drafts & citations)
+
+== 2. Verify Citation & Moderate Flashcards ==
+teacher -> frontend : Inspect source citation (page & excerpt)
+frontend -> routes : GET /flashcards/{cardId}/citation
+routes -> approval : validateCitation() & verifySource()
+approval -> db : SELECT linked DocumentSection
+db --> approval : Source section content
+approval --> frontend : Verified source excerpt & page
+
+teacher -> frontend : Approve, Edit, or Reject flashcard(s)
+frontend -> routes : PATCH /flashcards/{cardId} (status / content)
+routes -> approval : approveCard() / editCard() / rejectCard()
+approval -> db : UPDATE flashcard status (APPROVED / REJECTED)
+db --> approval : Updated record
+approval --> routes : Updated Flashcard
+routes --> frontend : 200 OK (Approved cards ready for Student study)
+@enduml

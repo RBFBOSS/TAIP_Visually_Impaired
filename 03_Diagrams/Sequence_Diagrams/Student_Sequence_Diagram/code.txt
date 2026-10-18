@@ -1,0 +1,44 @@
+@startuml
+title Sequence Diagram - Visually Impaired Student Workflow
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+hide footbox
+
+autonumber
+
+actor "Visually Impaired\nStudent" as student
+participant "Browser Voice Interface\n[Web Speech API]" as voice
+participant "Web Application\n[Next.js / React]" as frontend
+participant "FastAPI Backend\n[Docling / LiteLLM / FSRS]" as api
+database "Application Database\n[PostgreSQL]" as db
+participant "External LLM\nProvider" as llm
+
+== 1. Document Upload & AI Generation ==
+student -> voice : Voice command "Upload document"
+voice -> frontend : SpeechRecognition intent
+frontend -> api : POST /documents (PDF)
+api -> llm : Generate audio summaries & cited flashcards
+llm --> api : Summaries & draft flashcards
+api -> db : Save document, sections, summaries & drafts
+api --> frontend : SSE: Processing COMPLETED
+frontend -> voice : Read summary aloud (speechSynthesis)
+
+== 2. Flashcard Study & FSRS Scheduling ==
+student -> voice : "Start flashcards"
+voice -> frontend : SpeechRecognition intent
+frontend -> api : POST /study/sessions
+api -> db : Fetch due APPROVED flashcards
+db --> api : Due flashcards
+api --> frontend : Session started + first question
+frontend -> voice : Speak flashcard question
+student -> voice : "Flip card" -> Grade recall ("GOOD")
+voice -> frontend : Grade + response latency
+frontend -> api : POST /study/reviews (grade, latency)
+api -> db : Save ReviewLog & updated FSRS state (dueAt)
+api --> frontend : Next card / Session ProgressReport & feedback
+frontend -> voice : Speak learning feedback
+@enduml
