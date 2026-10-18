@@ -13,8 +13,8 @@
   - Discord: laur99
   - Mail: laurentiu.call99@gmail.com
 - Pantiru Dragos
-  - Discord:
-  - Mail:
+  - Discord:  dragos.8
+  - Mail: pantiru_dragos2014@yahoo.com
 - Zaharia Iulian
   - Discord: zaheu
   - Mail: iulian.zaharia@student.uaic.ro
