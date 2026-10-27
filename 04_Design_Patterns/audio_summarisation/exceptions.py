@@ -1,0 +1,2 @@
+class SummarisationError(Exception):
+    pass
