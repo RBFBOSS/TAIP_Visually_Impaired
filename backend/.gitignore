@@ -1,0 +1,5 @@
+# Python cache
+__pycache__/
+
+# Virtual environments
+# .env ramane aici, nu ne fura nimeni variabilele de mediu
