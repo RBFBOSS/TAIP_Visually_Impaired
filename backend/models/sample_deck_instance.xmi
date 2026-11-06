@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flashcard:Deck xmlns:xmi="http://www.omg.org/XMI" xmlns:flashcard="http://educational.app/flashcard" id="7b57e859-b35a-4c6e-85b7-a1ae098dd71a" documentId="820004cf-b6d6-47b9-9a62-fe05d9c9ad70" title="Neurology - Visual Systems Deck" createdAt="2026-11-06T15:42:06.458215" xmi:version="2.0">
+  <cards id="da9ce4f1-7f01-45d1-88a6-8499b5a583b9" question="What is the primary function of the visual cortex?" answer="It is responsible for processing sensory visual information." createdAt="2026-11-06T15:42:06.457995" updatedAt="2026-11-06T15:42:06.458012">
+    <citations id="6c121ca1-6384-439b-a816-80136ae3e475" sectionId="3aec8f01-c29c-44c1-a175-ca04bd732724" pageNumber="3" sourceExcerpt="The human visual cortex processes sensory inputs..."/>
+  </cards>
+</flashcard:Deck>
