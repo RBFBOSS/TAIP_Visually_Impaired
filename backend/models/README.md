@@ -2,29 +2,27 @@
 
 Un ghid pas cu pas de documentare și onboarding pentru membrii echipei la proiectul de **Tehnici Avansate în Ingineria Programării (TAIP)**.
 
----
-
 ## 1. Contextul Proiectului și Obiectivele
 
 Aplicația noastră este un asistent educațional dedicat persoanelor cu deficiențe de vedere. Aceasta preia documente în format PDF încărcate de utilizator, le împarte în secțiuni semantice (chunks) și generează prin intermediul AI atât rezumate optimizate pentru redare audio, cât și pachete de flashcard-uri pentru învățare activă.
 
 Pentru cerința de **Model-Driven Software Engineering (MDSE / EMF)**, am avut de realizat:
 1. Definirea unui metamodel structural formal (`.ecore` / `.genmodel`) în mediul Eclipse Modeling Tools.
-2. Integrarea și utilizarea efectivă a acestui metamodel în cadrul unei componente funcționale din proiect.
+2. Integrarea și utilizarea efectivă a acestui metamodel în cadrul unei componente funcționale din proiect prin generare automată de cod / instanțiere conformă standardului.
 
 ### De ce PyEcore în loc de rescriere în Java?
+
 Întregul backend al aplicației noastre este dezvoltat în **Python (FastAPI)**. Rescrierea proiectului în Java doar pentru a bifa cerința EMF ar fi fragmentat inutil arhitectura. Din acest motiv, am ales **PyEcore** — implementarea oficială a ecosistemului EMF pentru Python:
 * Citește și validează fișiere autentice `.ecore`.
 * Instanțiază obiectele direct în memoria Python, respectând tipurile de date și constrângerile definite în Ecore.
+* Permite generarea de cod static Python (clase native) prin `pyecoregen` (echivalentul opțiunii *Generate Model Code* din Eclipse `.genmodel`).
 * Salvează și citește datele în formatul standard **XMI (XML Metadata Interchange)**, fișiere care pot fi redeschise oricând în Eclipse.
-
----
 
 ## 2. Componenta Modelată: Flashcard Management
 
 Din arhitectura completă a sistemului, am izolat subsistemul de **Management al Flashcard-urilor**:
 
-```text
+```
 +-----------------------------------------------------------------+
 |                              Deck                               |
 |  - id: EString                                                  |
@@ -61,15 +59,13 @@ Decizii cheie de modelare:
 * **`sourceExcerpt` (`EString`)**: Păstrează fragmentul exact de text din PDF-ul original pe baza căruia AI-ul a formulat întrebarea și răspunsul. Acest lucru permite utilizatorului sau cititorului de ecran să verifice sursa și să se asigure că datele nu sunt halucinate.
 * **Containment (`EReference`)**: O relație de compoziție strictă în care un `Deck` deține fizic flashcard-urile (`containment = true`, `upperBound = -1`), iar un `Flashcard` deține una sau mai multe citări (`containment = true`, `lowerBound = 1`, `upperBound = -1`).
 
----
-
 ## 3. Pasul 1: Descărcarea și Configurarea Eclipse Modeling Tools
 
 Dacă trebuie să deschideți arborele sau să modificați vizual metamodelul în fața cadrului didactic:
 
 1. **Cerință preliminară**: Asigurați-vă că aveți instalat un Java JDK pe calculator (versiunea 17 sau 21 este recomandată).
 2. **Descărcare**:
-   * Intrați pe: [https://www.eclipse.org/downloads/packages/](https://www.eclipse.org/downloads/packages/)
+   * Intrați pe: [eclipse.org/downloads/packages](https://www.eclipse.org/downloads/packages/)
    * **NU** descărcați varianta generică *Eclipse IDE for Java Developers*.
    * Căutați pachetul specific **Eclipse Modeling Tools** și descărcați arhiva pentru sistemul vostru de operare (Windows, macOS sau Linux).
 3. **Pornire**:
@@ -80,8 +76,6 @@ Dacă trebuie să deschideți arborele sau să modificați vizual metamodelul î
    * Mergeți în meniul de sus: `Window` -> `Preferences` (sau `Eclipse` -> `Settings` pe Mac).
    * Navigați la `General` -> `Appearance`.
    * La câmpul **Theme**, alegeți **Light** (sau **Classic**), apoi apăsați **Apply and Close**.
-
----
 
 ## 4. Pasul 2: Crearea Metamodelului Ecore în Eclipse
 
@@ -106,32 +100,49 @@ Iată rezumatul modului în care a fost creat fișierul `flashcard_management.ec
    * **Relațiile**: Click dreapta pe clasă -> `New Child` -> `EReference`:
      * `Deck.cards`: `EType = Flashcard`, `UpperBound = -1`, `Containment = true`.
      * `Flashcard.citations`: `EType = Citation`, `LowerBound = 1`, `UpperBound = -1`, `Containment = true`.
-5. **Salvare**: `Ctrl + S`. Fișierul `.ecore` este salvat în repository la calea `backend/models/`.
+5. **Salvare**: `Ctrl + S`. Fișierul `.ecore` se copiază în repository la calea `backend/models/`.
 
----
+## 5. Pasul 3: Generarea Automată a Codului Python (`pyecoregen`)
 
-## 5. Pasul 3: Integrarea și Rularea în Python
+În loc să scriem clasele Python de mână, folosim principiul de bază al MDE: **Codegen pe baza metamodelului formal**.
 
-Metamodelul definit este încărcat dinamic în backend-ul nostru de Python cu ajutorul `pyecore`.
+### 5.1 Instalarea Utilitarului de Generare
 
-### 5.1 Configurarea Mediului
-
-Asigurați-vă că sunteți în directorul proiectului și că mediul virtual Python este activat:
+În terminalul mediului virtual din backend:
 
 ```bash
-# Activare mediu virtual (Windows PowerShell)
-.\backend\.venv\Scripts\Activate.ps1
-
-# (Sau pe Linux / macOS)
-# source backend/.venv/bin/activate
-
-# Instalare dependență PyEcore
-pip install pyecore
+pip install pyecore pyecoregen
 ```
 
-### 5.2 Codul Componentei Python (`backend/models/flashcard_management.py`)
+### 5.2 Rularea Generatorului de Cod
 
-Acest script încarcă schema `.ecore`, instanțiază obiectele de domeniu, le asociază și le serializează într-un fișier XMI:
+Navigați în folderul `backend/models/` și rulați comanda:
+
+```bash
+pyecoregen -e flashcard_management.ecore -o generated_models
+```
+
+* `-e flashcard_management.ecore`: indică fișierul metamodel sursă.
+* `-o generated_models`: directorul de destinație unde va fi generat pachetul Python.
+
+### 5.3 Ce se generează și de ce arată așa?
+
+În folderul creat `generated_models/flashcard/` apare fișierul `flashcard.py`. Codul generat conține:
+* **`metaclass=MetaEClass` și moștenirea `EObject`**: Leagă clasele Python de nucleul EMF, permițând validarea automată a tipurilor și rezolvarea relațiilor la runtime.
+* **Descriptori `EAttribute` și `EReference`**:
+  ```python
+  cards = EReference(ordered=True, unique=True, containment=True, derived=False, upper=-1)
+  ```
+  Acestea definesc constrângerile declarate în Ecore (`upper=-1` = listă fără limită, `containment=True` = compoziție fizică de noduri).
+* **Colecții gestionate**: La adăugarea unui element (`self.cards.extend(...)`), PyEcore setează automat pointerul către părinte conform arborelui de containment.
+
+> **Regulă importantă:** Acest fișier este artefact generat automat; **nu se editează manual**. Dacă metamodelul se modifică în Eclipse, se re-rulează comanda `pyecoregen`.
+
+## 6. Pasul 4: Utilizarea Modelului în Componenta Backend
+
+Există două moduri de a rula componenta: folosind clasele generate static (recomandat) sau încărcând dinamic fișierul `.ecore`.
+
+### 6.1 Implementarea cu Clasele Generate (`backend/models/flashcard_management.py`)
 
 ```python
 import uuid
@@ -139,29 +150,14 @@ from datetime import datetime
 from pathlib import Path
 from pyecore.resources import ResourceSet, URI
 
+# Importăm direct clasele generate automat de pyecoregen
+from generated_models.flashcard import Deck, Flashcard, Citation, ApprovalStatus
+
 def run_flashcard_component():
     current_dir = Path(__file__).resolve().parent
-    ecore_path = current_dir / 'flashcard_management.ecore'
     output_xmi_path = current_dir / 'sample_deck_instance.xmi'
 
-    if not ecore_path.exists():
-        raise FileNotFoundError(f"Nu s-a găsit metamodelul: {ecore_path}")
-
-    # 1. Inițializăm containerul de resurse PyEcore
-    rset = ResourceSet()
-
-    # 2. Încărcăm metamodelul exportat din Eclipse
-    print(f"[EMF] Se încarcă metamodelul din: {ecore_path.name}...")
-    resource = rset.get_resource(URI(str(ecore_path)))
-    flashcard_pkg = resource.contents[0]
-
-    # 3. Obținem referințe către clase și enum-uri folosind metoda conformă getEClassifier
-    Deck = flashcard_pkg.getEClassifier('Deck')
-    Flashcard = flashcard_pkg.getEClassifier('Flashcard')
-    Citation = flashcard_pkg.getEClassifier('Citation')
-    ApprovalStatus = flashcard_pkg.getEClassifier('ApprovalStatus')
-
-    # 4. Instanțiem o Citare (referința către sursa extrasă pentru cititorul de ecran)
+    # 1. Instanțiem o Citare pe baza clasei generate
     citation_instance = Citation(
         id=str(uuid.uuid4()),
         sectionId=str(uuid.uuid4()),
@@ -169,57 +165,54 @@ def run_flashcard_component():
         sourceExcerpt="The human visual cortex processes sensory inputs..."
     )
 
-    # 5. Instanțiem un Flashcard educațional
+    # 2. Instanțiem un Flashcard educațional
     flashcard_instance = Flashcard(
         id=str(uuid.uuid4()),
         question="What is the primary function of the visual cortex?",
         answer="It is responsible for processing sensory visual information.",
         createdAt=datetime.now(),
         updatedAt=datetime.now(),
-        status=ApprovalStatus.DRAFT
+        status=ApprovalStatus.DRAFT,
+        citations=[citation_instance]
     )
-    flashcard_instance.citations.append(citation_instance)
 
-    # 6. Instanțiem Deck-ul rădăcină
+    # 3. Instanțiem Deck-ul de carduri
     deck_instance = Deck(
         id=str(uuid.uuid4()),
         documentId=str(uuid.uuid4()),
         title="Neurology - Visual Systems Deck",
-        createdAt=datetime.now()
+        createdAt=datetime.now(),
+        cards=[flashcard_instance]
     )
-    deck_instance.cards.append(flashcard_instance)
 
-    # 7. Serializăm instanța în format XMI
+    # 4. Serializăm instanța în format XMI (standardul EMF de persistență)
+    rset = ResourceSet()
     xmi_resource = rset.create_resource(URI(str(output_xmi_path)))
     xmi_resource.append(deck_instance)
     xmi_resource.save()
 
-    print(f"[EMF] Succes! Instanța modelului a fost serializată în: {output_xmi_path.name}")
+    print(f"[EMF] Succes! Modelul a fost salvat ca XMI în: {output_xmi_path.name}")
 
 if __name__ == '__main__':
     run_flashcard_component()
 ```
 
-### 5.3 Rularea Scriptului
+### 6.2 Rularea Componentei
 
-Din consolă, rulați:
+Din consolă rulați:
 
 ```bash
 python backend/models/flashcard_management.py
 ```
 
 Ieșirea așteptată:
-
 ```text
-[EMF] Se încarcă metamodelul din: flashcard_management.ecore...
-[EMF] Succes! Instanța modelului a fost serializată în: sample_deck_instance.xmi
+[EMF] Succes! Modelul a fost salvat ca XMI în: sample_deck_instance.xmi
 ```
 
----
+## 7. Ce Reprezintă Fișierul Generat `.xmi`?
 
-## 6. Ce Reprezintă Fișierul Generat `.xmi`?
-
-Fișierul rezultat `sample_deck_instance.xmi` nu este un XML oarecare, ci un fișier standardizat de persistență **OMG XMI**:
+Fișierul rezultat `sample_deck_instance.xmi` reprezintă serializarea standardizată **OMG XMI**:
 
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
@@ -239,22 +232,22 @@ Fișierul rezultat `sample_deck_instance.xmi` nu este un XML oarecare, ci un fi�
 </flashcard:Deck>
 ```
 
-* Datorită setării relațiilor de tip **containment**, XML-ul include cardurile direct în interiorul nodului `Deck`, iar citările în interiorul nodului `Flashcard`.
-* Dacă acest fișier `.xmi` este tras înapoi în Eclipse, Eclipse EMF îl va recunoaște și îl va afișa sub formă de arbore vizual populat cu datele din Python.
+* Datorită relațiilor de tip **containment**, XML-ul include cardurile direct în nodul `Deck`, iar citările în nodul `Flashcard`.
+* Dacă trageți fișierul `sample_deck_instance.xmi` în Eclipse, acesta poate fi deschis cu arborele EMF și va afișa datele create în Python.
 
----
+## 8. Ghid pentru Prezentare la Laborator / Examen
 
-## 7. Ghid pentru Prezentare la Laborator / Examen
+La prezentare, parcurgeți următoarea demonstrație în 4 pași simpli:
 
-La prezentare, parcurgeți următoarea demonstrație în 3 pași:
-
-1. **Arătați Arborele Metamodelului în Eclipse**:
+1. **Arborele Ecore în Eclipse**:
    * Deschideți Eclipse Modeling Tools.
    * Extindeți `flashcard_management.ecore`.
-   * Arătați pachetul rădăcină (cu `Ns URI`), enum-ul `ApprovalStatus`, cele 3 clase (`EClass`) și relațiile de containment (`cards` și `citations`).
-2. **Arătați Componenta din Python**:
+   * Arătați pachetul rădăcină (cu `Ns URI`), enum-ul `ApprovalStatus`, clasele (`Deck`, `Flashcard`, `Citation`) și relațiile de containment.
+2. **Generarea de Cod (Codegen)**:
+   * Menționați comanda `pyecoregen -e flashcard_management.ecore -o generated_models`.
+   * Arătați rapid fișierul `generated_models/flashcard/flashcard.py` ca dovadă a generării automate a claselor EObject din metamodel.
+3. **Execuția Componentei în Python**:
    * Deschideți `flashcard_management.py` în VS Code.
-   * Menționați că s-a utilizat **PyEcore** pentru a asigura interoperabilitatea cu standardul EMF direct în backend-ul de Python.
-   * Rulați scriptul în terminalul integrat pentru a arăta generarea în timp real.
-3. **Arătați Fișierul XMI Rezultat**:
-   * Deschideți `sample_deck_instance.xmi` și arătați structura XML generată conform constrângerilor din metamodel.
+   * Rulați `python flashcard_management.py` în terminal pentru a arăta execuția și instanțierea.
+4. **Validarea Persistenței XMI**:
+   * Deschideți `sample_deck_instance.xmi` și arătați conformitatea structurii ierarhice XML cu relațiile din metamodelul inițial.
