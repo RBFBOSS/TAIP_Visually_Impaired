@@ -1,7 +1,6 @@
 from fastapi import FastAPI
+from app.flashcards.api.routes import router as flashcards_router
 
 app = FastAPI()
 
-@app.get("/hello-world")
-def hello_world():
-  return { "message": "Hello world" }
+app.include_router(flashcards_router)
