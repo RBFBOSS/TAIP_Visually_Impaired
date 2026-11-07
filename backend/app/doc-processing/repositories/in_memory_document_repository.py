@@ -23,3 +23,6 @@ class InMemoryDocumentRepository(DocumentRepository):
 
     def find_by_id(self, document_id: UUID) -> Optional[Document]:
         return self._storage.get(document_id)
+
+    def find_all(self) -> List[Document]:
+        return list(self._storage.values())

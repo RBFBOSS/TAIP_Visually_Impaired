@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID, uuid4
+
 from pydantic import BaseModel, Field
 
 PDF_SIGNATURE = b"%PDF-"
@@ -19,6 +20,14 @@ class ProcessingStatus(str, Enum):
     FAILED = "FAILED"
 
 
+class Flashcard(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    documentId: UUID
+    question: str
+    answer: str
+    sourcePage: int
+
+
 class Document(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     filename: str
@@ -26,22 +35,34 @@ class Document(BaseModel):
     status: ProcessingStatus = ProcessingStatus.UPLOADED
     uploadedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     pageCount: Optional[int] = None
-    text: Optional[str] = Field(default=None, repr=False, exclude=True)
+    pages: List[str] = Field(default_factory=list, repr=False, exclude=True)
+    summary: Optional[str] = None
+    flashcards: List[Flashcard] = Field(default_factory=list)
+
+    @property
+    def text(self) -> Optional[str]:
+        """Reconstruct the full text for the existing preview response."""
+        non_empty_pages = [page for page in self.pages if page.strip()]
+        return "\n\n".join(non_empty_pages) if non_empty_pages else None
 
     def start_processing(self) -> None:
         self.status = ProcessingStatus.PROCESSING
         self.pageCount = None
-        self.text = None
+        self.pages = []
+        self.summary = None
+        self.flashcards = []
 
-    def complete(self, pageCount: int, text: str) -> None:
-        self.pageCount = pageCount
-        self.text = text
+    def complete(self, pages: List[str]) -> None:
+        self.pageCount = len(pages)
+        self.pages = pages
         self.status = ProcessingStatus.COMPLETED
 
     def fail(self) -> None:
         self.status = ProcessingStatus.FAILED
         self.pageCount = None
-        self.text = None
+        self.pages = []
+        self.summary = None
+        self.flashcards = []
 
     @classmethod
     def from_upload(cls, filename: str, content: bytes) -> "Document":

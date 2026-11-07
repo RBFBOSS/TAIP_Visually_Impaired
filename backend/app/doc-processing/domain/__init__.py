@@ -1,3 +1,3 @@
-from domain.models import Document, InvalidDocumentError, ProcessingStatus
+from domain.models import Document, Flashcard, InvalidDocumentError, ProcessingStatus
 
-__all__ = ["Document", "InvalidDocumentError", "ProcessingStatus"]
+__all__ = ["Document", "Flashcard", "InvalidDocumentError", "ProcessingStatus"]

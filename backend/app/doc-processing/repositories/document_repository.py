@@ -22,3 +22,8 @@ class DocumentRepository(ABC):
     def find_by_id(self, document_id: UUID) -> Optional[Document]:
         """Finds a document by ID. Returns None otherwise."""
         pass
+
+    @abstractmethod
+    def find_all(self) -> List[Document]:
+        """Finds all stored documents."""
+        pass

@@ -1,5 +1,10 @@
+from pathlib import Path
+
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from api.routes import router as documents_router
 
