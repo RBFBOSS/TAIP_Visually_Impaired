@@ -11,7 +11,7 @@ from api.schemas import (
     StudyMaterialResponse,
     SummaryResponse,
 )
-from domain import Document, Flashcard, InvalidDocumentError
+from domain import Document, Flashcard, InvalidDocumentError, ProcessingStatus
 from services import (
     AiGenerationError,
     DocumentNotFoundError,
@@ -73,6 +73,26 @@ async def upload_documents(
     except InvalidDocumentError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     return [_map_document_to_response(document) for document in documents]
+
+
+@router.get("", response_model=List[DocumentResponse])
+def list_documents(
+    document_status: Optional[ProcessingStatus] = Query(default=None, alias="status"),
+    service: DocumentService = Depends(get_document_service),
+):
+    documents = service.listDocuments(status=document_status)
+    return [_map_document_to_response(document) for document in documents]
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_document(
+    document_id: UUID,
+    service: DocumentService = Depends(get_document_service),
+):
+    try:
+        service.deleteDocument(document_id)
+    except DocumentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
 
 @router.get("/{document_id}", response_model=DocumentDetailResponse)

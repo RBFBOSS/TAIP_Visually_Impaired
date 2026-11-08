@@ -88,6 +88,36 @@ def test_upload_without_files_is_rejected(client):
     assert response.status_code == 422
 
 
+def test_list_documents_and_filter_by_status(client):
+    uploaded = client.post("/documents", files=[pdf_part("uploaded.pdf")])
+    completed = client.post("/documents", files=[pdf_part("completed.pdf")])
+    completed_id = completed.json()[0]["id"]
+    assert client.post(f"/documents/{completed_id}/process").status_code == 200
+
+    response = client.get("/documents")
+
+    assert response.status_code == 200
+    assert [item["filename"] for item in response.json()] == [
+        "uploaded.pdf", "completed.pdf"
+    ]
+    assert client.get("/documents?status=UPLOADED").json() == uploaded.json()
+    assert [item["filename"] for item in
+            client.get("/documents?status=COMPLETED").json()] == ["completed.pdf"]
+    assert client.get("/documents?status=INVALID").status_code == 422
+
+
+def test_delete_document_and_unknown_id(client, repository):
+    upload = client.post("/documents", files=[pdf_part("lesson.pdf")])
+    document_id = upload.json()[0]["id"]
+
+    deleted = client.delete(f"/documents/{document_id}")
+
+    assert deleted.status_code == 204
+    assert repository.find_by_id(UUID(document_id)) is None
+    assert client.get(f"/documents/{document_id}").status_code == 404
+    assert client.delete(f"/documents/{document_id}").status_code == 404
+
+
 def test_process_and_get_document_return_page_count_and_preview(client):
     upload = client.post("/documents", files=[pdf_part("lesson.pdf")])
     document_id = upload.json()[0]["id"]

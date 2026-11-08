@@ -84,6 +84,29 @@ def test_load_document_rejects_unknown_id():
         service.loadDocument(uuid4())
 
 
+def test_list_documents_returns_all_documents_and_can_filter_by_status():
+    service, _ = make_service()
+    uploaded = upload_one(service)
+    completed = service.uploadDocuments([("complete.pdf", PDF_CONTENT)])[0]
+    service.processDocument(completed.id)
+
+    assert service.listDocuments() == [uploaded, completed]
+    assert service.listDocuments(status=ProcessingStatus.UPLOADED) == [uploaded]
+    assert service.listDocuments(status=ProcessingStatus.COMPLETED) == [completed]
+    assert service.listDocuments(status=ProcessingStatus.FAILED) == []
+
+
+def test_delete_document_removes_it_and_unknown_id_is_not_found():
+    service, repository = make_service()
+    document = upload_one(service)
+
+    service.deleteDocument(document.id)
+
+    assert repository.find_by_id(document.id) is None
+    with pytest.raises(DocumentNotFoundError):
+        service.deleteDocument(document.id)
+
+
 def test_process_document_stores_page_count_and_pages():
     service, repository = make_service()
     document = upload_one(service)

@@ -3,7 +3,7 @@ from typing import Callable, List, Optional, Tuple
 from uuid import UUID
 
 from ai.groq_client import GeneratedStudyMaterial, generate_study_material
-from domain import Document, Flashcard
+from domain import Document, Flashcard, ProcessingStatus
 from repositories import DocumentRepository
 from services.pdf_reader import read_pdf
 
@@ -65,6 +65,20 @@ class DocumentService:
         if document is None:
             raise DocumentNotFoundError(f"Document with ID {id} was not found.")
         return document
+
+    def listDocuments(
+        self, status: Optional[ProcessingStatus] = None
+    ) -> List[Document]:
+        """Returns all documents, optionally filtered by processing status."""
+        documents = self.repository.find_all()
+        if status is not None:
+            documents = [document for document in documents if document.status == status]
+        return documents
+
+    def deleteDocument(self, id: UUID) -> None:
+        """Deletes a document or raises when the requested document is missing."""
+        self.loadDocument(id)
+        self.repository.delete(id)
 
     def processDocument(self, id: UUID) -> Document:
         document = self.loadDocument(id)

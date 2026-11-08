@@ -26,3 +26,9 @@ class InMemoryDocumentRepository(DocumentRepository):
 
     def find_all(self) -> List[Document]:
         return list(self._storage.values())
+
+    def delete(self, document_id: UUID) -> bool:
+        if document_id not in self._storage:
+            return False
+        del self._storage[document_id]
+        return True

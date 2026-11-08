@@ -27,3 +27,8 @@ class DocumentRepository(ABC):
     def find_all(self) -> List[Document]:
         """Finds all stored documents."""
         pass
+
+    @abstractmethod
+    def delete(self, document_id: UUID) -> bool:
+        """Deletes a document by ID. Returns False when it does not exist."""
+        pass

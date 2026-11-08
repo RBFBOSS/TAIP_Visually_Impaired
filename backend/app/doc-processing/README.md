@@ -33,6 +33,8 @@ Document status: `UPLOADED` → `PROCESSING` → `COMPLETED` or `FAILED`.
 | Method | Path | Result |
 |---|---|---|
 | POST | `/documents` | Upload PDFs (multipart field `files`, repeatable). |
+| GET | `/documents?status=UPLOADED` | List documents; `status` is optional (`UPLOADED`, `PROCESSING`, `COMPLETED`, or `FAILED`). |
+| DELETE | `/documents/{id}` | Delete a document and its generated study material. |
 | GET | `/documents/{id}` | Status, page count, and the first 30 characters of text. |
 | POST | `/documents/{id}/process` | Extract the text, page by page. |
 | POST | `/documents/{id}/generate?fromPage=1&toPage=10` | Generate and save the summary and flashcards. |
@@ -46,11 +48,13 @@ Errors: `400` not a PDF, `404` unknown id or nothing generated yet, `422` no rea
 
 ```bash
 curl -F "files=@lesson1.pdf" http://127.0.0.1:8001/documents
+curl "http://127.0.0.1:8001/documents?status=COMPLETED"
 curl -X POST http://127.0.0.1:8001/documents/<id>/process
 curl -X POST "http://127.0.0.1:8001/documents/<id>/generate?fromPage=20&toPage=29"
 curl http://127.0.0.1:8001/documents/summary/<id>
 curl http://127.0.0.1:8001/documents/flashcards/<id>
 curl http://127.0.0.1:8001/documents/flashcard/<flashcardId>
+curl -X DELETE http://127.0.0.1:8001/documents/<id>
 ```
 
 ## Limitations
