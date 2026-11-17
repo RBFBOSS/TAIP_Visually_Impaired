@@ -175,10 +175,10 @@ The registration walkthrough with a realistic mistake. Same equipment (NVDA + ke
 | 1 | Opens create-account URL, presses `H` | "Create an account, heading level 1", then paragraph: "Create one account to upload documents and study them as flashcards. If you already have an account, sign in, link." | Wording is "Create an account" — never "Register" or "Sign up" (R7, GOV.UK create-accounts pattern); the intro sets context before the form |
 | 2 | `F` → first field | "Full name, edit" | `autocomplete="name"` (R9) |
 | 3 | Types name; `Tab` | "Email address, edit. You will use this address to sign in." | Hint read with the field via `aria-describedby` (R8) |
-| 4 | Types email; `Tab` | "Create a password, edit protected. Use at least 15 characters." | **The rule is stated before the field**, in its description, so the student hears it before typing — not after failing (R8, R17, GOV.UK passwords pattern) |
-| 5 | **Mistake:** leaves full name empty, types a 12-character password, `Tab`, `Space` on "Create account" | Title: "Error: Create an account – EVIS". Focus: "There is a problem, alert. Enter your full name, link. Create a password with at least 15 characters, link." | Validate on submit only (R11); summary focused, one link per problem, links worded exactly like the inline errors (R20–R22); what the student typed is kept (R12) |
+| 4 | Types email; `Tab` | "Create a password, edit protected. Use at least 8 characters." | **The rule is stated before the field**, in its description, so the student hears it before typing — not after failing (R8, R17, GOV.UK passwords pattern) |
+| 5 | **Mistake:** leaves full name empty, types a 6-character password, `Tab`, `Space` on "Create account" | Title: "Error: Create an account – EVIS". Focus: "There is a problem, alert. Enter your full name, link. Create a password with at least 8 characters, link." | Validate on submit only (R11); summary focused, one link per problem, links worded exactly like the inline errors (R20–R22); what the student typed is kept (R12) |
 | 6 | `Tab` to first link, `Enter` | Focus moves to Full name; field described by "Error: Enter your full name" | Summary link → field focus; inline error above the field, identical wording, `aria-describedby` (R22, R23); group marked with a left border so a magnifier user sees it too |
-| 7 | Types name; `Tab` to password link in summary (or `F`), `Enter` | Focus moves to password; "Create a password, edit protected. Use at least 15 characters. Error: Create a password with at least 15 characters." | Same machinery; the student can re-read the rule and the error together |
+| 7 | Types name; `Tab` to password link in summary (or `F`), `Enter` | Focus moves to password; "Create a password, edit protected. Use at least 8 characters. Error: Create a password with at least 8 characters." | Same machinery; the student can re-read the rule and the error together |
 | 8 | Types a 20-character passphrase, optionally presses Show to verify, submits | Success: title "Account created – EVIS"; focus: "Success, heading level 2 … Your account has been created. You are now signed in." | Single password field — no confirm-password (R16); explicit success banner, focused (R26); account creation signs the student in, one step |
 
 There is no CAPTCHA (R14) and no security question anywhere — security questions cost a Dosono participant 166 seconds (D10) and NIST SP 800-63B-4 forbids them.
@@ -308,7 +308,7 @@ Findings that shape EVIS:
 Other findings from the same study and related reporting:
 
 - Headphones are common — audible feedback is private, but never speak secrets aloud anyway (R18).
-- Random passwords with special characters are hard to locate on a keyboard; passphrases get read letter-by-letter and are painful to type. → Minimum 15 characters with no composition rules (R17, NIST): a long passphrase of ordinary words beats "Xy!9kL#2" for a blind typist.
+- Random passwords with special characters are hard to locate on a keyboard; passphrases get read letter-by-letter and are painful to type. → No composition rules (R17, NIST): a passphrase of ordinary words beats "Xy!9kL#2" for a blind typist.
 - Braille display users read text at ~1.5× the speed of speech — another reason for concise, consistent wording (R7).
 
 ### 5.4 What we therefore rule out completely
@@ -395,7 +395,7 @@ Every product examined — GOV.UK, Accessibyte, Be My Eyes, Bitwarden, Apple —
 ### Passwords
 
 - **R16** Registration has exactly one password field, labelled "Create a password". No confirm-password field. *Test: count password inputs on create-account.*
-- **R17** Password policy: minimum **15** characters (NIST SP 800-63B-4 SHALL for single-factor; GOV.UK's own minimum is 8 — EVIS deliberately chooses 15 because our users rely on passphrases and managers, not memorised short passwords); allow at least 64; no composition rules (no forced capitals/digits/symbols); no periodic expiry; no password hints; check new passwords against a compromised-password blocklist and explain a rejection in plain words ("This password has appeared in a data breach. Choose a different one."). The rule is stated *before* the field: hint "Use at least 15 characters." *Test: register with 15 ordinary words; register with a breached password.*
+- **R17** Password policy: minimum **8** characters, matching the GOV.UK minimum, chosen to keep typing and audio verification short for screen-reader and braille-display users. This is a **deliberate deviation** from NIST SP 800-63B-4 §3.1.1.2, which requires a minimum of 15 characters where a password is the *single* authentication factor and permits 8 only where the password is one factor of multi-factor authentication; EVIS v1 has no second factor. The deviation is recorded rather than hidden: with no composition rules and no length cushion, the compromised-password blocklist below carries the policy, and the gap closes by adding a second factor or raising the minimum. Allow at least 64; no composition rules; no periodic expiry; no password hints; check new passwords against a compromised-password blocklist and explain a rejection in plain words. The rule is stated *before* the field: hint "Use at least 8 characters." *Test: register with an 8-character password; register with a breached password.*
 - **R18** Show-password button next to every password field: `type="button"`, `aria-controls` pointing at the input, accessible name toggling "Show password"/"Hide password", visible text toggling "Show"/"Hide", plus a visually-hidden `role="status"` region announcing "Your password is shown"/"Your password is hidden". The password value itself is never spoken or announced. If the form is submitted while shown, the field returns to masked. *Test: press Show, check status text, check type toggles, submit, check re-masked.*
 - **R19** Paste into password fields is never blocked (`onpaste` untouched); no `readonly`-until-focus tricks; the page must work with Bitwarden `Ctrl/Cmd+Shift+L`, browser autofill, and iOS AutoFill. *Test: paste a password; autofill with a real manager.*
 
@@ -497,7 +497,7 @@ Exact wording for every element of the three auth screens and the two success sc
 | Intro paragraph | `Create one account to upload documents and study them as flashcards. If you already have an account, sign in.` (with `sign in` as a link) |
 | Full name label | `Full name`; error: `Enter your full name` |
 | Email label | `Email address`, hint: `You will use this address to sign in.`; errors: `Enter an email address` · `Enter an email address in the correct format, like name@example.com` |
-| Password label | `Create a password`, hint (read before typing): `Use at least 15 characters.`; errors: `Create a password` · `Create a password with at least 15 characters` |
+| Password label | `Create a password`, hint (read before typing): `Use at least 8 characters.`; errors: `Create a password` · `Create a password with at least 8 characters` |
 | Submit | `Create account` |
 | Breached password (server, later) | `This password has appeared in a data breach. Choose a different one.` |
 | Success | Navigate to account-created state; banner: heading `Success`, body `Your account has been created. You are now signed in.`; `h1` `Welcome to EVIS`; body `You can now upload your first document.`; link `Go to your documents` |
@@ -534,7 +534,7 @@ Create-account flow:
 
 ```mermaid
 flowchart TD
-  A[Student opens Create an account page] --> B[Full name, email, Create a password — rule Use at least 15 characters heard before typing]
+  A[Student opens Create an account page] --> B[Full name, email, Create a password — rule Use at least 8 characters heard before typing]
   B --> C[Activates Create account]
   C --> D{All fields valid?}
   D -- no --> E[Same page: title Error: prefix; error summary focused; one link per problem; inline errors above fields; entered values kept]
@@ -598,6 +598,8 @@ The nine figures below were rendered from the validated reference pages with hea
 ![Create an account page in its error state: error summary at the top with two links, inline errors above the Full name and Create a password fields, error borders on field groups](05_figures/fig3-create-account-errors.png)
 
 *Figure 3 — Create an account after a failed submit: focused error summary ("There is a problem"), links worded exactly like the inline errors, entered values kept (R20–R23, walkthrough [3.6](#36-creating-an-account--including-a-mistake-and-its-correction)).*
+
+*This figure predates the password-minimum change from 15 to 8 characters (R17) and still shows the former "at least 15 characters" wording; the structure it demonstrates is unchanged.*
 
 ![Sign-in page at a 320 CSS pixel viewport: single column, no horizontal scrolling](05_figures/fig4-sign-in-400pct.png)
 
@@ -824,10 +826,10 @@ The six HTML pages, one stylesheet, and one script below were built outside the 
     </div>
     <div class="form-group">
       <label for="password">Create a password</label>
-      <p class="hint" id="password-hint">Use at least 15 characters.</p>
+      <p class="hint" id="password-hint">Use at least 8 characters.</p>
       <div class="password-wrapper">
         <input id="password" name="password" type="password" autocomplete="new-password" spellcheck="false" autocapitalize="none" aria-describedby="password-hint"
-               data-required-msg="Create a password" data-minlength="15" data-minlength-msg="Create a password with at least 15 characters">
+               data-required-msg="Create a password" data-minlength="8" data-minlength-msg="Create a password with at least 8 characters">
         <button type="button" class="button button--secondary" data-show-password aria-controls="password" aria-label="Show password" hidden>Show</button>
       </div>
       <span class="visually-hidden" role="status" data-password-status></span>
@@ -2089,7 +2091,7 @@ Type: functional
 Status: proposed
 
 **F08_SWR08:**
-Description: the application shall enforce a password policy of at least 15 characters with no composition rules, no periodic expiry, no hints and no security questions, shall allow paste into password fields, and shall reject compromised passwords with a plain-language explanation.
+Description: the application shall enforce a password policy of at least 8 characters with no composition rules, no periodic expiry, no hints and no security questions, shall allow paste into password fields, and shall reject compromised passwords with a plain-language explanation.
 Type: functional
 Status: proposed
 

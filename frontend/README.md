@@ -64,7 +64,7 @@ A session holds only the name and the email. "Keep me signed in" puts it in `loc
 |---|---|
 | R1–R5, R7 | Unique titles ending in "– EVIS", `lang="en"`, a skip link into `<main>`, one `h1` per page, the form first in `<main>`, and one set of words everywhere: "Sign in", "Create an account", "Sign out" |
 | R8–R15 | Labels above fields, hints and errors tied on with `aria-describedby`, the right `autocomplete` tokens, `noValidate`, no `required` / `maxlength` / `autofocus` anywhere, validation on submit only, entered values kept, `spellcheck="false"` on email |
-| R16–R19 | One password field, the 15-character rule stated before it, Show/Hide with `aria-controls` and a hidden status region, re-masked on submit, paste never blocked |
+| R16–R19 | One password field, the minimum-length rule stated before it, Show/Hide with `aria-controls` and a hidden status region, re-masked on submit, paste never blocked |
 | R20–R25 | The "Error: " title prefix, a focused error summary with one link per problem, each link moving focus to its field, the same message inline above the field with a visually-hidden "Error: ", `aria-invalid`, the left border on the group, and the one generic sign-in message |
 | R26–R28 | Focused `role="alert"` success banners, no toasts, "Signed in as …" next to an explicit Sign out |
 | R29–R31 | A 4px outline plus an 8px yellow halo on focus, yellow background and black text on focused links, focus order matching DOM order |

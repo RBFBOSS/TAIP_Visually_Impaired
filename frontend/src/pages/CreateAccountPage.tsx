@@ -111,7 +111,7 @@ export default function CreateAccountPage() {
         <PasswordField
           id="password"
           label="Create a password"
-          hint="Use at least 15 characters."
+          hint={`Use at least ${MIN_PASSWORD_LENGTH} characters.`}
           autoComplete="new-password"
           value={password}
           onChange={setPassword}

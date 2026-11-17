@@ -8,8 +8,10 @@ export type Problem = {
 /* The test the validated reference implementation uses. */
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-/* Rule R17: EVIS asks for a passphrase, not a short password. */
-export const MIN_PASSWORD_LENGTH = 15
+/* Rule R17: 8 characters, matching the GOV.UK minimum. This sits below NIST
+   SP 800-63B-4's 15-character minimum for single-factor sign-in; the research
+   document records the deviation and why it was accepted. */
+export const MIN_PASSWORD_LENGTH = 8
 
 export function isBlank(value: string): boolean {
   return value.trim() === ''
