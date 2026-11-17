@@ -7,7 +7,7 @@
 **Status:** research complete, ready to design and build from
 **Scope:** research document only — no application code is changed by this document
 
-This document answers one question: *how do students who cannot see, and students who can barely see, actually sign in, register, and use EVIS — and what exactly must the interface do to support them?* It is built from published user studies with blind and low-vision people, from large user surveys, from design systems that already solve authentication accessibly, and from a reference implementation that was built and machine-checked while writing this document (axe-core plus accessibility-tree checks, 57/57 passed; see [8.7](#87-reference-implementation-validated)).
+This document answers one question: *how do students who cannot see, and students who can barely see, actually sign in, register, and use EVIS — and what exactly must the interface do to support them?* It covers the authentication screens and the two screens the product is actually used for: uploading a document and studying the flashcards that come out of it. It is built from published user studies with blind and low-vision people, from large user surveys, from design systems that already solve authentication accessibly, from the project's own SWR (Features 2, 3, 5, 6, 7), and from a reference implementation that was built and machine-checked while writing this document (axe-core plus accessibility-tree and behaviour checks, 113/113 passed; see [8.7](#87-reference-implementation-validated)).
 
 Everything is in English. The proposed interface wording is English and the reference pages use `lang="en"`. Romanian wording and localisation are deferred (see [12.2](#122-localisation-deferred)). Voice interaction is also deferred to a later version, with the limits recorded in [12.1](#121-voice-interaction-deferred).
 
@@ -39,6 +39,7 @@ Everything is in English. The proposed interface wording is English and the refe
 | Voice interaction | Not in the first version | Browser voice APIs cannot be relied on (see [12.1](#121-voice-interaction-deferred)); screen reader + keyboard is the proven path |
 | Language | English only (`lang="en"`) | Romanian wording and localisation deferred to avoid premature abstraction ([12.2](#122-localisation-deferred)) |
 | Screen reader detection | Never | It is unreliable and widely advised against ([12.1](#121-voice-interaction-deferred)); any mode is chosen by the student, never guessed |
+| Accessibility controls | A visible **Display settings** disclosure in the header of every page, including the sign-in page: theme (Light/Dark/System) and text size (100/125/150%), persisted (R57) | A low-vision student who cannot read the page must be able to change it *before* signing in, without hunting through a menu; the control costs one Tab stop when collapsed ([9.4](#94-display-settings)) |
 | Biometrics / passkeys | Out of scope for v1; noted for later | Passkey flows are promising for accessibility but need platform support ([6.4](#64-password-managers-and-passkeys-as-accessibility-features)) |
 
 ### 1.2 The ten rules that matter most
@@ -56,7 +57,7 @@ The full numbered rule list is in [section 7](#7-the-uiux-rules). These ten deci
 9. **Big text that scales: 20px base, single column, reflow at 400% zoom / 320px with no horizontal scrolling** (R37, R39, R40). 17.9% of low-vision respondents zoom to 400% or more.
 10. **An unmistakable focus indicator on every theme** — dark outline plus yellow halo, GOV.UK style (R29).
 
-The reference pages in [section 8.7](#87-reference-implementation-validated) implement all of this and pass all 57 automated checks.
+The reference pages in [section 8.7](#87-reference-implementation-validated) implement all of this and pass all 113 automated checks. For the upload and study screens, three more rules decide whether the product is usable at all: **nothing moves without a keypress** (R50), **the card position is spoken with every card** (R51), and **each grade button says what it will do next** (R53).
 
 ## 2. Who the students are
 
@@ -119,7 +120,7 @@ The most common combination in the surveys: **NVDA with Chrome or Firefox on a W
 | 7 | Optional: `Tab` to "Show", `Space` | "Show, button" → after press: "Your password is shown" (status) | Show-password button: `type="button"`, `aria-controls`, label toggles "Show password"/"Hide password", hidden `role="status"` region announces the *state*, never the value (R18, GOV.UK password input component). This also repairs the masking problem: a student who mistyped can look (or ask a sighted peer) without losing the account |
 | 8 | `Tab` | "Keep me signed in, checkbox, not checked. Stay signed in on this device. Do not use this on a shared computer." | Checkbox with visible label; hint tied with `aria-describedby` (R8); unchecked by default (R41) |
 | 9 | `Tab`, then `Space` or `Enter` | "Sign in, button" → activates | Submit button with the same wording as the page title/h1 — consistent terminology (R7) |
-| 10a | **Success:** page changes | Title "Signed in – EVIS"; focus lands on the banner: "Success, heading level 2 … You are now signed in." | Navigate to a real success state; success banner with `role="alert"`, `tabindex="-1"`, focus moved to it on load (R26). Never leave the user in silence — Napoli found users had to infer success from the *absence* of errors ([5.2](#52-napoli-et-al--im-literally-just-hoping-this-will-work-soups-2021)) |
+| 10a | **Success:** page changes | Lands on Your documents; title "Your documents – EVIS"; focus lands on the banner: "Success, heading level 2 … You are now signed in." | Navigate to a real success state; success banner with `role="alert"`, `tabindex="-1"`, focus moved to it on load (R26). Never leave the user in silence — Napoli found users had to infer success from the *absence* of errors ([5.2](#52-napoli-et-al--im-literally-just-hoping-this-will-work-soups-2021)) |
 | 10b | **Failure:** page stays | Title becomes "Error: Sign in – EVIS"; focus lands on: "There is a problem, alert … Check your email address and password, link" | Title prefixed "Error: " (R20); error summary at top, focused (R21); one link per problem (R22); email kept, password cleared (R12); the message does **not** say which of the two credentials was wrong (R25) |
 | 11 | After failure: `Tab`/`Enter` on the summary link | Focus jumps to the email field; inline error read via description | Summary links jump to the exact field (R22); inline error tied with `aria-describedby`, identical wording (R23); `aria-invalid="true"` set but never the only signal (R24) |
 
@@ -368,7 +369,7 @@ Every product examined — GOV.UK, Accessibyte, Be My Eyes, Bitwarden, Apple —
 
 ## 7. The UI/UX rules
 
-45 numbered, testable rules. Each has a test the team can run (see [11](#11-test-plan)). Grouped by area; the ten most important are flagged in [1.2](#12-the-ten-rules-that-matter-most).
+57 numbered, testable rules. Each has a test the team can run (see [11](#11-test-plan)). Grouped by area; the ten most important are flagged in [1.2](#12-the-ten-rules-that-matter-most).
 
 ### Page structure
 
@@ -431,7 +432,7 @@ Every product examined — GOV.UK, Accessibyte, Be My Eyes, Bitwarden, Apple —
 
 - **R37** Base text 20px; labels, inputs, buttons 25px; `h1` ≈ 48px; line-height 1.5; all sizing in `rem`. *Test: computed-style check.*
 - **R38** Sans-serif body font (Atkinson Hyperlegible Next candidate, fallback Verdana/Tahoma/Arial); no italic body text; no all-caps blocks. *Test: style review.*
-- **R39** Single-column layout, left-aligned, content max-width ~40rem; reflows at 320 CSS px (400% zoom) with **no horizontal scrolling** (WCAG 1.4.10). *Test: 320px viewport harness check (part of the 57 automated checks).*
+- **R39** Single-column layout, left-aligned, content max-width ~40rem; reflows at 320 CSS px (400% zoom) with **no horizontal scrolling** (WCAG 1.4.10). *Test: 320px viewport harness check (part of the 113 automated checks).*
 - **R40** Fully usable at 250% browser zoom (WCAG 1.4.4) and at 400%. *Test: zoom harness + manual.*
 
 ### Session
@@ -444,6 +445,27 @@ Every product examined — GOV.UK, Accessibyte, Be My Eyes, Bitwarden, Apple —
 - **R43** If client-side routing is introduced, every route change must update `<title>` and move focus to the new page's `h1` (or banner) — screen reader users otherwise hear nothing about navigation. *Test: navigate with NVDA running.*
 - **R44** Per the repository's own work instructions: every UI change is verified with keyboard navigation (Tab, Space, Enter) and automated accessibility checks before merge. The harness in [8.7](#87-reference-implementation-validated) is the starting point. *Test: CI/manual gate per PR.*
 - **R45** When voice is added later ([12.1](#121-voice-interaction-deferred)): never speak passwords or personal data aloud; never auto-detect screen readers; app speech must be user-enabled and must not fire while a screen reader owns the audio. *Test: design review gate.*
+
+### Documents and upload (Feature 2, Feature 3)
+
+- **R46** Upload progress is page text in a polite live region (`role="status"`), throttled to **stage** changes ("Uploading chapter1.pdf" → "Processing: extracting text" → "Processing: generating flashcards"), never a percentage-per-tick stream, never a toast, never a spinner without words. *Test: MutationObserver on the status region records exactly the stage strings, in order (in the 113 automated checks).*
+- **R47** The file input has a visible label ("Choose a PDF"), the accepted format and size limit stated in a hint **before** the field, `accept=".pdf"`, and **no `required` attribute**; the PDF-only rule is enforced by our own error summary (R20–R23), not by native validation. *Test: tree readback of the field and hint; submit a `.txt` file and check focus and reading order.*
+- **R48** The document list is heading-navigable: the list has an `h2` heading stating the count ("3 documents"), each document is an `h3`, every action link names its document ("Study chapter1.pdf", never a bare "Study"), and document state is stated **in words** ("ready", "processing", "failed"), never by colour or icon alone. *Test: `H` navigation reaches each document; link list shows distinct names; states still read with colours removed.*
+- **R49** A finished upload is a **focused** banner naming the file and what came out of it ("chapter1.pdf is ready with 24 flashcards.") with a link straight into study. A failed upload says what to do next ("Upload a readable version of lecture-05.pdf."), never just "failed". *Test: complete and fail an upload; check where focus lands and what the banner says.*
+
+### Study session (Feature 5, Feature 6)
+
+- **R50** **Nothing in a study session moves without a keypress.** No timers, no auto-advance, no auto-flip, no countdown, no "next card in 3…2…1". *Test: leave a card alone for 10 seconds; no DOM change (in the 113 automated checks).*
+- **R51** The card position is part of **every** announcement: the card region is named "Card 3 of 24" and the question carries the position in `aria-describedby`, so it is spoken whenever the question is read, repeated, or refocused. *Test: tree readback of the region name and the question description.*
+- **R52** Revealing the answer is an in-place change with focus moved to the answer text: no modal, no animation, no transition, no flip effect, nothing that depends on `prefers-reduced-motion` because nothing moves. The answer is the first thing spoken after "Show answer". *Test: press Show answer; focus is on the answer text; no animation or transition properties in the stylesheet.*
+- **R53** Each grade button speaks its own consequence inside its accessible name: "Again Review in 10 minutes", "Hard Review in 1 day", "Good Review in 4 days", "Easy Review in 9 days". The intervals come from the scheduler, never from a guess or a hard-coded string. Grading refocuses the next question. *Test: tree readback of the four button names against the scheduler's output; grade a card and check focus.*
+- **R54** Every card has a visible **Repeat question** and **Repeat answer** button — the keyboard equivalent of the SWR's "Repeat" voice command, implemented as focus movement, not as app speech. *Test: press each; focus returns to the right text.*
+- **R55** The student can always end a session ("End session"), and ending produces a focused summary saying what was reviewed and what happens to the rest ("You reviewed 1 of 3 cards. The remaining cards stay in your queue."). Finishing the queue says when the next review happens ("You reviewed 3 cards. Next review: in 4 days."). *Test: end early, then finish a full queue; check both summaries (in the 113 automated checks).*
+- **R56** The NVDA caveat on `Space`: in browse mode `Space` means page-down, so a visible button is always the primary way to reveal an answer — F05_SWR03's Space shortcut is an *enhancement*, never the only path, and must not fire while the student is typing or reading. *Test: NVDA browse mode — `Space` on a card scrolls the page and does not flip it; the button still works.*
+
+### Accessibility controls
+
+- **R57** Accessibility controls are visible **before sign-in**: a "Display settings" disclosure in the header of every page, one Tab stop when collapsed, containing theme (Light/Dark/System) and text size (100/125/150%) as labelled radios. Changes apply immediately, persist across navigation, and light becomes the default only when the OS has no colour-scheme preference. *Test: Tab twice from the top of the sign-in page; change both settings; navigate to another page; both still applied (in the 113 automated checks).*
 
 ## 8. Screen specifications
 
@@ -522,9 +544,48 @@ flowchart TD
   G --> H[Link: Go to your documents]
 ```
 
+Upload flow (the reference page mirrors the backend's own states: `UPLOADED` → `PROCESSING` → `COMPLETED` | `FAILED`):
+
+```mermaid
+flowchart TD
+  A[Student reaches Your documents: h2 states the count, each document an h3 with named links] --> B[Choose a PDF: real file input, no required attribute]
+  B --> C{File chosen?}
+  C -- no --> D[Error summary focused: Select a PDF file to upload]
+  D --> B
+  C -- yes --> E[role=status: Selected: chapter1.pdf (1.2 MB) — confirmation without leaving the field]
+  E --> F[Activates Upload]
+  F --> G{PDF?}
+  G -- no --> H[Error summary focused: Select a PDF file. Other file types are not supported.]
+  H --> B
+  G -- yes --> I[Polite status region, throttled to stages: Uploading chapter1.pdf → Processing: extracting text → Processing: generating flashcards]
+  I --> J{Processing succeeded?}
+  J -- no --> K[Document marked failed in the list: Failed: we could not read this file. + Upload a readable version link (R49)]
+  J -- yes --> L[Focused banner: chapter1.pdf is ready with 24 flashcards. + Study chapter1.pdf link]
+  L --> M[Study session]
+```
+
+Study loop (FSRS grades come from the backend scheduler, Feature 5):
+
+```mermaid
+flowchart TD
+  A[Student reaches Study: focus moves to the card region named Card 1 of 24] --> B[Question text carries Card 1 of 24 in aria-describedby]
+  B --> C{Student action}
+  C -- Repeat question --> B
+  C -- Show answer --> D[Answer revealed in place, no modal, no animation; focus moves to the answer text]
+  D -- Repeat answer --> D
+  D --> E[Four grade buttons, each naming its own interval: Again Review in 10 minutes / Hard Review in 1 day / Good Review in 4 days / Easy Review in 9 days]
+  C -- End session --> H[Focused summary: You reviewed 1 of 3 cards. The remaining cards stay in your queue.]
+  E --> F[Grade saved to FSRS state; scheduler returns the next interval]
+  F --> G{Cards left in the queue?}
+  G -- yes --> B
+  G -- no --> I[Focused summary: You reviewed 3 cards. Next review: in 4 days.]
+```
+
+Neither diagram contains an automatic transition. Nothing advances without a keypress (R50).
+
 ### 8.5 Figures
 
-The four figures below were rendered from the validated reference pages with headless Chromium (deviceScaleFactor 2–4 for legibility) and inspected before embedding.
+The nine figures below were rendered from the validated reference pages with headless Chromium (deviceScaleFactor 2–4 for legibility). Each was verified from the pixels before embedding (45/45 checks: correct background per theme, ink present, content inside the margins, nothing cut off at the bottom).
 
 ![Sign-in page, high-contrast light theme: 20px base text, labels above fields, Show button, Keep me signed in checkbox, Sign in button, links to reset password and create account](05_figures/fig1-sign-in-light.png)
 
@@ -542,6 +603,26 @@ The four figures below were rendered from the validated reference pages with hea
 
 *Figure 4 — Sign in at 320 CSS px = 400% zoom (R39, R40, walkthrough [4.1](#41-the-magnifier-student-400-zoom)).*
 
+![Your documents page: Display settings bar in the header, a list of three documents each with its own heading and its state in words (ready, processing, failed), then the upload form with a labelled file input and hint text](05_figures/fig5-upload-page.png)
+
+*Figure 5 — Your documents: a heading-navigable list with every state in words, then the upload form (R46–R49, walkthrough [9.1](#91-document-upload)).*
+
+![Your documents page during processing: the status line under the file input reads "Processing: extracting text" and the Upload button is held busy](05_figures/fig6-upload-processing.png)
+
+*Figure 6 — Upload progress is page text in a polite live region, throttled to stage changes; the Upload button is held with `aria-disabled` until it finishes (R46).*
+
+![Study page showing a card front: "Card 1 of 3" position line, the Question label, the question as a large heading, and Repeat question / Show answer buttons](05_figures/fig7-study-question.png)
+
+*Figure 7 — A card front: the position is part of every announcement and nothing moves without a keypress (R50–R52, walkthrough [9.2](#92-study-session-flashcards)).*
+
+![Study page after Show answer: the answer revealed in place, a Repeat answer button, and four grade buttons — Again Review in 10 minutes, Hard Review in 1 day, Good Review in 4 days, Easy Review in 9 days](05_figures/fig8-study-answer.png)
+
+*Figure 8 — The answer revealed in place (no modal, no animation) with the four FSRS grades speaking their own intervals (R52–R54).*
+
+![Study page at the end of the queue: a focused success banner reading "Session complete — You reviewed 3 cards. Next review: in 4 days."](05_figures/fig9-study-summary.png)
+
+*Figure 9 — Finishing the queue focuses a summary that says what happens next (R55).*
+
 ### 8.6 How the reference pages work together
 
 | File | Role |
@@ -549,14 +630,17 @@ The four figures below were rendered from the validated reference pages with hea
 | `sign-in.html` | Sign-in screen ([8.1](#81-sign-in)) |
 | `create-account.html` | Registration screen ([8.2](#82-create-an-account)) |
 | `reset-password.html` | Password reset screen ([8.3](#83-reset-your-password)) |
-| `signed-in.html` | Sign-in success state — focused Success banner |
-| `account-created.html` | Registration success state — focused Success banner |
-| `styles.css` | Both high-contrast themes, focus indicator, forced-colors support |
-| `form.js` | Submit-time validation, error summary machinery, Show-password, success-banner focus |
+| `account-created.html` | Registration success state — focused Success banner, link to the documents page |
+| `your-documents.html` | Document list + upload form ([9.1](#91-document-upload)); also where sign-in lands — `?signed-in=1` shows the focused "You are now signed in" banner exactly once |
+| `study.html` | Flashcard study session ([9.2](#92-study-session-flashcards)) |
+| `styles.css` | Both high-contrast themes, focus indicator, display-settings bar, document list, upload status, flashcard and grade styles, forced-colors support |
+| `form.js` | Display settings (persisted), submit-time validation, error summary machinery, Show-password, success-banner focus, upload flow with staged status, study loop with focus management |
+
+Every page carries the same Display settings disclosure in its header (R57); the markup is identical on all six pages, so it is embedded once in [8.7](#87-reference-implementation-validated) as part of `sign-in.html`.
 
 ### 8.7 Reference implementation (validated)
 
-The five HTML pages, one stylesheet, and one script below were built outside the repository and machine-checked on 2026-11-16: **axe-core 4.14.1** (WCAG tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`) plus **57 custom checks** of the accessibility tree and behaviour in headless Chromium (via puppeteer-core 25.17.0) — **all 57 passed**. The checks cover: accessible names/descriptions for every field, button, landmark, and heading; tab order; `novalidate`/no-`required`; autocomplete tokens; the error summary receiving focus; the `"Error: "` title prefix; summary-link-to-field focus movement; `aria-describedby` wiring; `aria-invalid`; Show-password type/label/status toggling; success navigation with focus moved to the banner; and 320px reflow on every page in both themes.
+The six HTML pages, one stylesheet, and one script below were built outside the repository and machine-checked on 2026-11-17: **axe-core 4.14.1** (WCAG tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`) plus **113 custom checks** of the accessibility tree and behaviour in headless Chromium (via puppeteer-core 25.17.0) — **all 113 passed**. The checks cover: accessible names/descriptions for every field, button, landmark, and heading; tab order; `novalidate`/no-`required`; autocomplete tokens; the error summary receiving focus; the `"Error: "` title prefix; summary-link-to-field focus movement; `aria-describedby` wiring; `aria-invalid`; Show-password type/label/status toggling; success navigation with focus moved to the banner; the display-settings disclosure (open, persist, carry across page navigations, collapse returns focus); the upload flow (selection confirmation, empty and non-PDF rejections through the same error-summary machinery, the stage-by-stage live-region log, the focused completion banner, the list and count updates); the study loop (focus on the question at load, position in the region name and the question description, in-place answer reveal with focus on the answer text, grade names carrying their intervals, the repeat buttons, grading advancing and refocusing, early-end and completion summaries, and a 2.5-second idle check proving nothing moves without a keypress); and 320px reflow on every page in both themes.
 
 `sign-in.html`:
 
@@ -574,6 +658,46 @@ The five HTML pages, one stylesheet, and one script below were built outside the
 <header class="site-header">
   <div class="container">
     <p class="brand">EVIS <small>Education for visually impaired students</small></p>
+    <div class="display-settings">
+      <button type="button" class="button button--secondary display-settings__toggle" data-display-toggle
+              aria-expanded="false" aria-controls="display-panel">Display settings</button>
+      <div class="display-settings__panel" id="display-panel" hidden>
+        <fieldset>
+          <legend>Theme</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="theme-light" name="evis-theme" type="radio" value="light">
+              <label for="theme-light">Light</label>
+            </div>
+            <div class="choice">
+              <input id="theme-dark" name="evis-theme" type="radio" value="dark">
+              <label for="theme-dark">Dark</label>
+            </div>
+            <div class="choice">
+              <input id="theme-system" name="evis-theme" type="radio" value="system" checked>
+              <label for="theme-system">System</label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Text size</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="size-100" name="evis-textsize" type="radio" value="100" checked>
+              <label for="size-100">100%</label>
+            </div>
+            <div class="choice">
+              <input id="size-125" name="evis-textsize" type="radio" value="125">
+              <label for="size-125">125%</label>
+            </div>
+            <div class="choice">
+              <input id="size-150" name="evis-textsize" type="radio" value="150">
+              <label for="size-150">150%</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
   </div>
 </header>
 <main id="main-content" class="container">
@@ -582,7 +706,7 @@ The five HTML pages, one stylesheet, and one script below were built outside the
     <ul class="error-summary__list"></ul>
   </div>
   <h1>Sign in</h1>
-  <form action="signed-in.html" novalidate data-validate>
+  <form action="your-documents.html?signed-in=1" novalidate data-validate>
     <div class="form-group">
       <label for="email">Email address</label>
       <input id="email" name="email" type="email" autocomplete="email" spellcheck="false"
@@ -636,6 +760,46 @@ The five HTML pages, one stylesheet, and one script below were built outside the
 <header class="site-header">
   <div class="container">
     <p class="brand">EVIS <small>Education for visually impaired students</small></p>
+    <div class="display-settings">
+      <button type="button" class="button button--secondary display-settings__toggle" data-display-toggle
+              aria-expanded="false" aria-controls="display-panel">Display settings</button>
+      <div class="display-settings__panel" id="display-panel" hidden>
+        <fieldset>
+          <legend>Theme</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="theme-light" name="evis-theme" type="radio" value="light">
+              <label for="theme-light">Light</label>
+            </div>
+            <div class="choice">
+              <input id="theme-dark" name="evis-theme" type="radio" value="dark">
+              <label for="theme-dark">Dark</label>
+            </div>
+            <div class="choice">
+              <input id="theme-system" name="evis-theme" type="radio" value="system" checked>
+              <label for="theme-system">System</label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Text size</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="size-100" name="evis-textsize" type="radio" value="100" checked>
+              <label for="size-100">100%</label>
+            </div>
+            <div class="choice">
+              <input id="size-125" name="evis-textsize" type="radio" value="125">
+              <label for="size-125">125%</label>
+            </div>
+            <div class="choice">
+              <input id="size-150" name="evis-textsize" type="radio" value="150">
+              <label for="size-150">150%</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
   </div>
 </header>
 <main id="main-content" class="container">
@@ -697,6 +861,46 @@ The five HTML pages, one stylesheet, and one script below were built outside the
 <header class="site-header">
   <div class="container">
     <p class="brand">EVIS <small>Education for visually impaired students</small></p>
+    <div class="display-settings">
+      <button type="button" class="button button--secondary display-settings__toggle" data-display-toggle
+              aria-expanded="false" aria-controls="display-panel">Display settings</button>
+      <div class="display-settings__panel" id="display-panel" hidden>
+        <fieldset>
+          <legend>Theme</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="theme-light" name="evis-theme" type="radio" value="light">
+              <label for="theme-light">Light</label>
+            </div>
+            <div class="choice">
+              <input id="theme-dark" name="evis-theme" type="radio" value="dark">
+              <label for="theme-dark">Dark</label>
+            </div>
+            <div class="choice">
+              <input id="theme-system" name="evis-theme" type="radio" value="system" checked>
+              <label for="theme-system">System</label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Text size</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="size-100" name="evis-textsize" type="radio" value="100" checked>
+              <label for="size-100">100%</label>
+            </div>
+            <div class="choice">
+              <input id="size-125" name="evis-textsize" type="radio" value="125">
+              <label for="size-125">125%</label>
+            </div>
+            <div class="choice">
+              <input id="size-150" name="evis-textsize" type="radio" value="150">
+              <label for="size-150">150%</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
   </div>
 </header>
 <main id="main-content" class="container">
@@ -731,44 +935,7 @@ The five HTML pages, one stylesheet, and one script below were built outside the
 </html>
 ```
 
-`signed-in.html` (sign-in success state):
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Signed in – EVIS</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<a class="skip-link" href="#main-content">Skip to main content</a>
-<header class="site-header">
-  <div class="container">
-    <p class="brand">EVIS <small>Education for visually impaired students</small></p>
-  </div>
-</header>
-<main id="main-content" class="container">
-  <div class="success-banner" id="success-banner" role="alert" tabindex="-1" aria-labelledby="success-banner-title" data-autofocus-banner>
-    <h2 id="success-banner-title">Success</h2>
-    <p>You are now signed in.</p>
-  </div>
-  <h1>Your documents</h1>
-  <p>Your uploaded documents will appear here. This reference page only demonstrates what happens after a successful sign-in.</p>
-  <p><a href="sign-in.html">Sign out</a></p>
-</main>
-<footer class="site-footer">
-  <div class="container">
-    <p>EVIS team project. Reference page for accessibility research.</p>
-  </div>
-</footer>
-<script src="form.js"></script>
-</body>
-</html>
-```
-
-`account-created.html` (registration success state):
+`account-created.html`:
 
 ```html
 <!DOCTYPE html>
@@ -784,6 +951,46 @@ The five HTML pages, one stylesheet, and one script below were built outside the
 <header class="site-header">
   <div class="container">
     <p class="brand">EVIS <small>Education for visually impaired students</small></p>
+    <div class="display-settings">
+      <button type="button" class="button button--secondary display-settings__toggle" data-display-toggle
+              aria-expanded="false" aria-controls="display-panel">Display settings</button>
+      <div class="display-settings__panel" id="display-panel" hidden>
+        <fieldset>
+          <legend>Theme</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="theme-light" name="evis-theme" type="radio" value="light">
+              <label for="theme-light">Light</label>
+            </div>
+            <div class="choice">
+              <input id="theme-dark" name="evis-theme" type="radio" value="dark">
+              <label for="theme-dark">Dark</label>
+            </div>
+            <div class="choice">
+              <input id="theme-system" name="evis-theme" type="radio" value="system" checked>
+              <label for="theme-system">System</label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Text size</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="size-100" name="evis-textsize" type="radio" value="100" checked>
+              <label for="size-100">100%</label>
+            </div>
+            <div class="choice">
+              <input id="size-125" name="evis-textsize" type="radio" value="125">
+              <label for="size-125">125%</label>
+            </div>
+            <div class="choice">
+              <input id="size-150" name="evis-textsize" type="radio" value="150">
+              <label for="size-150">150%</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
   </div>
 </header>
 <main id="main-content" class="container">
@@ -793,7 +1000,7 @@ The five HTML pages, one stylesheet, and one script below were built outside the
   </div>
   <h1>Welcome to EVIS</h1>
   <p>You can now upload your first document.</p>
-  <p><a href="signed-in.html">Go to your documents</a></p>
+  <p><a href="your-documents.html">Go to your documents</a></p>
 </main>
 <footer class="site-footer">
   <div class="container">
@@ -805,7 +1012,230 @@ The five HTML pages, one stylesheet, and one script below were built outside the
 </html>
 ```
 
-`styles.css` (themes, sizes, focus):
+`your-documents.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your documents – EVIS</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+  <div class="container">
+    <p class="brand">EVIS <small>Education for visually impaired students</small></p>
+    <div class="display-settings">
+      <button type="button" class="button button--secondary display-settings__toggle" data-display-toggle
+              aria-expanded="false" aria-controls="display-panel">Display settings</button>
+      <div class="display-settings__panel" id="display-panel" hidden>
+        <fieldset>
+          <legend>Theme</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="theme-light" name="evis-theme" type="radio" value="light">
+              <label for="theme-light">Light</label>
+            </div>
+            <div class="choice">
+              <input id="theme-dark" name="evis-theme" type="radio" value="dark">
+              <label for="theme-dark">Dark</label>
+            </div>
+            <div class="choice">
+              <input id="theme-system" name="evis-theme" type="radio" value="system" checked>
+              <label for="theme-system">System</label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Text size</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="size-100" name="evis-textsize" type="radio" value="100" checked>
+              <label for="size-100">100%</label>
+            </div>
+            <div class="choice">
+              <input id="size-125" name="evis-textsize" type="radio" value="125">
+              <label for="size-125">125%</label>
+            </div>
+            <div class="choice">
+              <input id="size-150" name="evis-textsize" type="radio" value="150">
+              <label for="size-150">150%</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main-content" class="container">
+  <div class="error-summary" id="error-summary" role="alert" tabindex="-1" aria-labelledby="error-summary-title" hidden>
+    <h2 class="error-summary__title" id="error-summary-title">There is a problem</h2>
+    <ul class="error-summary__list"></ul>
+  </div>
+  <div class="success-banner" id="success-banner" role="alert" tabindex="-1" aria-labelledby="success-banner-title"
+       data-autofocus-banner data-banner-param="signed-in" hidden>
+    <h2 id="success-banner-title">Success</h2>
+    <p>You are now signed in.</p>
+  </div>
+  <div class="success-banner" id="upload-success" tabindex="-1" aria-labelledby="upload-success-title" hidden>
+    <h2 id="upload-success-title">Upload complete</h2>
+    <p data-upload-success-text></p>
+  </div>
+
+  <h1>Your documents</h1>
+
+  <h2 id="documents-heading">3 documents</h2>
+  <ul class="doc-list" id="document-list">
+    <li class="doc-item">
+      <h3>chapter1.pdf</h3>
+      <p class="doc-item__meta">24 flashcards. Ready to study. 3 are due today.</p>
+      <p><a href="study.html">Study chapter1.pdf</a></p>
+    </li>
+    <li class="doc-item">
+      <h3>biology-notes.pdf</h3>
+      <p class="doc-item__meta">Processing: generating flashcards. Started 2 minutes ago.</p>
+      <p>You can leave this page. The flashcards appear here when it finishes.</p>
+    </li>
+    <li class="doc-item">
+      <h3>lecture-05.pdf</h3>
+      <p class="doc-item__meta doc-item__meta--failed">Failed: we could not read this file.</p>
+      <p><a href="#document-file">Upload a readable version of lecture-05.pdf</a></p>
+    </li>
+  </ul>
+
+  <h2 id="upload-heading">Upload a document</h2>
+  <form method="post" action="#" novalidate data-validate data-upload aria-labelledby="upload-heading">
+    <div class="form-group">
+      <label for="document-file">Choose a PDF</label>
+      <p class="hint" id="file-hint">PDF files only, up to 50 MB. Processing takes a few minutes and you can leave this page while it works.</p>
+      <input id="document-file" name="document" type="file" accept=".pdf,application/pdf" aria-describedby="file-hint"
+             data-required-msg="Select a PDF file to upload"
+             data-pdf-msg="Select a PDF file. Other file types are not supported.">
+      <p class="status-line" role="status" data-upload-status></p>
+    </div>
+    <button type="submit" class="button button--primary">Upload</button>
+  </form>
+
+  <p><a href="sign-in.html">Sign out</a></p>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>EVIS team project. Reference page for accessibility research.</p>
+  </div>
+</footer>
+<script src="form.js"></script>
+</body>
+</html>
+```
+
+`study.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study chapter1.pdf – EVIS</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+  <div class="container">
+    <p class="brand">EVIS <small>Education for visually impaired students</small></p>
+    <div class="display-settings">
+      <button type="button" class="button button--secondary display-settings__toggle" data-display-toggle
+              aria-expanded="false" aria-controls="display-panel">Display settings</button>
+      <div class="display-settings__panel" id="display-panel" hidden>
+        <fieldset>
+          <legend>Theme</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="theme-light" name="evis-theme" type="radio" value="light">
+              <label for="theme-light">Light</label>
+            </div>
+            <div class="choice">
+              <input id="theme-dark" name="evis-theme" type="radio" value="dark">
+              <label for="theme-dark">Dark</label>
+            </div>
+            <div class="choice">
+              <input id="theme-system" name="evis-theme" type="radio" value="system" checked>
+              <label for="theme-system">System</label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Text size</legend>
+          <div class="choice-row">
+            <div class="choice">
+              <input id="size-100" name="evis-textsize" type="radio" value="100" checked>
+              <label for="size-100">100%</label>
+            </div>
+            <div class="choice">
+              <input id="size-125" name="evis-textsize" type="radio" value="125">
+              <label for="size-125">125%</label>
+            </div>
+            <div class="choice">
+              <input id="size-150" name="evis-textsize" type="radio" value="150">
+              <label for="size-150">150%</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main-content" class="container">
+  <h1>Study chapter1.pdf</h1>
+  <p>3 of 24 flashcards are due today. Nothing on this page changes until you press a button.</p>
+
+  <section class="card" data-study-card aria-labelledby="card-position">
+    <p class="card__position" id="card-position">Card 1 of 3</p>
+    <p class="card__label" id="question-label">Question</p>
+    <h2 class="card__question" id="card-question" tabindex="-1" aria-describedby="card-position">What does WCAG stand for?</h2>
+    <div class="card__actions">
+      <button type="button" class="button button--secondary" data-repeat-question>Repeat question</button>
+      <button type="button" class="button button--primary" data-show-answer>Show answer</button>
+    </div>
+    <div id="card-answer" hidden>
+      <p class="card__label" id="answer-label">Answer</p>
+      <p class="card__answer-text" id="card-answer-text" tabindex="-1">Web Content Accessibility Guidelines.</p>
+      <div class="card__actions">
+        <button type="button" class="button button--secondary" data-repeat-answer>Repeat answer</button>
+      </div>
+      <p class="card__label" id="grade-label">How well did you recall this card?</p>
+      <div class="card__actions" role="group" aria-labelledby="grade-label">
+        <button type="button" class="button button--grade" data-grade="again">Again<span class="button__interval">Review in 10 minutes</span></button>
+        <button type="button" class="button button--grade" data-grade="hard">Hard<span class="button__interval">Review in 1 day</span></button>
+        <button type="button" class="button button--grade" data-grade="good">Good<span class="button__interval">Review in 4 days</span></button>
+        <button type="button" class="button button--grade" data-grade="easy">Easy<span class="button__interval">Review in 9 days</span></button>
+      </div>
+    </div>
+  </section>
+
+  <p><button type="button" class="button button--secondary" data-end-session>End session</button></p>
+  <p><a href="your-documents.html">Back to your documents</a></p>
+
+  <div class="success-banner" id="session-summary" tabindex="-1" aria-labelledby="session-summary-title" hidden>
+    <h2 id="session-summary-title">Session complete</h2>
+    <p data-session-summary-text></p>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <p>EVIS team project. Reference page for accessibility research.</p>
+  </div>
+</footer>
+<script src="form.js"></script>
+</body>
+</html>
+```
+
+`styles.css`:
 
 ```css
 /* EVIS reference pages — high-contrast light and dark themes.
@@ -862,6 +1292,7 @@ body { margin: 0; }
 
 h1 { font-size: 2.4rem; line-height: 1.1; margin: 0 0 1.5rem; }
 h2 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 1rem; }
+h3 { font-size: 1.4rem; line-height: 1.2; margin: 0 0 0.5rem; }
 p { margin: 0 0 1rem; }
 
 a {
@@ -888,13 +1319,27 @@ a {
 .brand small { display: block; font-size: 1rem; font-weight: 400; color: var(--secondary); }
 .site-footer { border-top: 4px solid var(--border); margin-top: 3rem; padding: 1rem 0 2rem; color: var(--secondary); }
 
+/* Display settings: one disclosure button in the header of every page,
+   so theme and text size are reachable before signing in (rule R57).
+   Collapsed, it is a single Tab stop before the form. */
+.display-settings { margin-top: 0.75rem; }
+.display-settings__toggle { font-size: 1rem; padding: 0.5rem 1rem; min-height: 2.5rem; }
+.display-settings__panel { border: 2px solid var(--border); padding: 1rem 1.25rem; margin-top: 0.75rem; background: var(--bg); }
+.display-settings__panel fieldset { border: 0; margin: 0 0 1.25rem; padding: 0; }
+.display-settings__panel fieldset:last-child { margin-bottom: 0; }
+.display-settings__panel legend { font-weight: 700; font-size: 1.25rem; padding: 0; margin-bottom: 0.5rem; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.choice { display: flex; align-items: center; gap: 0.5rem; }
+.choice input { width: 1.5rem; height: 1.5rem; margin: 0; accent-color: var(--text); flex: none; }
+.choice label { display: inline; font-weight: 400; font-size: 1.25rem; margin: 0; }
+
 .form-group { margin-bottom: 2rem; }
 .form-group--error { border-left: 6px solid var(--error); padding-left: 1rem; }
 label { display: block; font-weight: 700; font-size: 1.25rem; margin-bottom: 0.35rem; }
 .hint { color: var(--secondary); margin: 0 0 0.5rem; }
 .error-message { color: var(--error); font-weight: 700; margin: 0 0 0.5rem; }
 
-input[type="email"], input[type="text"], input[type="password"] {
+input[type="email"], input[type="text"], input[type="password"], input[type="file"] {
   box-sizing: border-box;
   width: 100%;
   padding: 0.75rem;
@@ -921,6 +1366,7 @@ input.input--error { border-color: var(--error); border-width: 3px; }
 }
 .button--primary { background: var(--text); color: var(--bg); border: 2px solid var(--border); }
 .button--secondary { background: var(--bg); color: var(--text); border: 2px solid var(--border); }
+.button[aria-disabled="true"] { cursor: progress; }
 
 .checkbox-row { display: flex; align-items: flex-start; gap: 0.75rem; }
 .checkbox-row input { width: 1.75rem; height: 1.75rem; margin-top: 0.2rem; flex: none; accent-color: var(--text); }
@@ -942,6 +1388,8 @@ a:focus-visible { background: var(--focus); color: #000000; }
 .success-banner { background: var(--success-bg); color: var(--success-text); padding: 1.5rem; margin-bottom: 2rem; }
 .success-banner h2 { margin-top: 0; }
 .success-banner p { margin-bottom: 0; }
+.success-banner p + p { margin-top: 0.75rem; }
+.success-banner a { color: inherit; }
 
 .visually-hidden {
   position: absolute !important;
@@ -954,29 +1402,107 @@ a:focus-visible { background: var(--focus); color: #000000; }
   white-space: nowrap;
 }
 
+/* Documents list: each document is a heading + link, so heading navigation
+   (the most common screen reader strategy) reaches every document. */
+.doc-list { list-style: none; margin: 0 0 2rem; padding: 0; }
+.doc-item { border: 2px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+.doc-item__meta { color: var(--secondary); margin: 0 0 0.5rem; }
+.doc-item__meta--failed { color: var(--error); font-weight: 700; }
+.doc-item p:last-child { margin-bottom: 0; }
+
+/* Upload status line: page text, never a toast (rules R27, R46). */
+.status-line { font-weight: 700; margin: 0.75rem 0 0; }
+
+/* Flashcard: single column, no animation on reveal (rules R39, R52). */
+.card { border: 3px solid var(--border); padding: 1.5rem; margin-bottom: 2rem; }
+.card__position { font-weight: 700; font-size: 1.25rem; color: var(--secondary); margin: 0 0 1rem; }
+.card__label { font-weight: 700; color: var(--secondary); margin: 0 0 0.25rem; }
+.card__question { font-size: 1.6rem; margin: 0 0 1.5rem; }
+.card__answer-text { font-size: 1.6rem; margin: 0 0 1.5rem; }
+.card__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0 0 1rem; }
+.card__actions:last-child { margin-bottom: 0; }
+.button--grade { background: var(--bg); color: var(--text); border: 2px solid var(--border); flex: 1 1 12rem; min-width: 0; text-align: left; }
+.button__interval { display: block; font-size: 1rem; font-weight: 400; }
+
 @media (forced-colors: active) {
   input, .button { border: 2px solid ButtonText; }
   :focus-visible { outline: 4px solid Highlight; box-shadow: none; }
 }
 ```
 
-`form.js` (validation, errors, Show-password, success focus):
+`form.js`:
 
-```javascript
-/* EVIS reference pages: validate on submit, present errors the GOV.UK way,
-   and show/hide password.
-   - keep what the user typed
-   - "Error: " prefix on the page title
-   - error summary at the top of the page, focus moved to it, one link per field
-   - the same message next to each field, tied to it with aria-describedby
+```js
+/* EVIS reference pages:
+   - display settings (theme + text size) in a header disclosure, persisted
+   - validate on submit, present errors the GOV.UK way, show/hide password
+   - upload flow: status line as page text, focused success banner
+   - study loop: focus-managed flashcards, grades with intervals, no timers
 */
 (function () {
   'use strict';
 
-  /* Success banners on destination pages receive focus on load,
-     like the success variant of the GOV.UK notification banner. */
+  /* ---------- Display settings (rule R57) ----------
+     One disclosure button per page. Choices persist where the browser allows
+     (a real deployment runs on https, where storage always works). */
+  function store(key, value) {
+    try {
+      if (value === undefined) { return window.localStorage.getItem(key); }
+      window.localStorage.setItem(key, value);
+    } catch (e) { return null; }
+    return undefined;
+  }
+  function applyTheme(value) {
+    if (value === 'light' || value === 'dark') { document.documentElement.setAttribute('data-theme', value); }
+    else { document.documentElement.removeAttribute('data-theme'); }
+  }
+  function applyTextSize(value) {
+    document.documentElement.style.fontSize = (20 * parseInt(value, 10) / 100) + 'px';
+  }
+  (function () {
+    var toggle = document.querySelector('[data-display-toggle]');
+    var panel = document.getElementById('display-panel');
+    if (!toggle || !panel) { return; }
+    var themeRadios = Array.prototype.slice.call(document.querySelectorAll('input[name="evis-theme"]'));
+    var sizeRadios = Array.prototype.slice.call(document.querySelectorAll('input[name="evis-textsize"]'));
+    var savedTheme = store('evis-theme') || 'system';
+    var savedSize = store('evis-textsize') || '100';
+    themeRadios.forEach(function (r) { r.checked = (r.value === savedTheme); });
+    sizeRadios.forEach(function (r) { r.checked = (r.value === savedSize); });
+    applyTheme(savedTheme);
+    applyTextSize(savedSize);
+    toggle.addEventListener('click', function () {
+      var open = panel.hidden;
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) {
+        var first = panel.querySelector('input:checked') || panel.querySelector('input');
+        if (first) { first.focus(); }
+      } else if (panel.contains(document.activeElement)) {
+        toggle.focus();
+      }
+    });
+    themeRadios.forEach(function (r) {
+      r.addEventListener('change', function () { applyTheme(r.value); store('evis-theme', r.value); });
+    });
+    sizeRadios.forEach(function (r) {
+      r.addEventListener('change', function () { applyTextSize(r.value); store('evis-textsize', r.value); });
+    });
+  })();
+
+  /* Success banners on destination pages receive focus on load, like the
+     success variant of the GOV.UK notification banner. A banner carrying
+     data-banner-param only appears when that query parameter is present, so
+     "You are now signed in" is announced once, after sign-in, and not again
+     on every later visit to the same page. */
   var banner = document.querySelector('[data-autofocus-banner]');
-  if (banner) { banner.focus(); }
+  if (banner) {
+    var param = banner.getAttribute('data-banner-param');
+    if (!param || window.location.search.indexOf(param + '=1') !== -1) {
+      banner.hidden = false;
+      banner.focus();
+    }
+  }
 
   /* Show/hide password (GOV.UK password input component). The button starts
      hidden in the HTML and is only revealed when JavaScript runs. */
@@ -994,124 +1520,354 @@ a:focus-visible { background: var(--focus); color: #000000; }
     });
   });
 
+  /* ---------- Validation + errors (GOV.UK pattern) ----------
+     - keep what the user typed
+     - "Error: " prefix on the page title
+     - error summary at the top of the page, focus moved to it, one link per field
+     - the same message next to each field, tied to it with aria-describedby */
   var form = document.querySelector('form[data-validate]');
-  if (!form) { return; }
-  var originalTitle = document.title;
-  var fields = Array.prototype.slice.call(
-    form.querySelectorAll('input[data-required-msg], input[data-email-msg], input[data-minlength-msg]')
-  );
-  fields.forEach(function (f) { f.dataset.baseDescribedby = f.getAttribute('aria-describedby') || ''; });
+  if (form) {
+    var originalTitle = document.title;
+    var fields = Array.prototype.slice.call(
+      form.querySelectorAll('input[data-required-msg], input[data-email-msg], input[data-minlength-msg], input[data-pdf-msg]')
+    );
+    fields.forEach(function (f) { f.dataset.baseDescribedby = f.getAttribute('aria-describedby') || ''; });
 
-  function clearErrors() {
-    document.title = originalTitle;
-    var summary = document.getElementById('error-summary');
-    if (summary) { summary.hidden = true; summary.querySelector('ul').innerHTML = ''; }
-    Array.prototype.forEach.call(form.querySelectorAll('.error-message'), function (e) { e.remove(); });
-    fields.forEach(function (f) {
-      f.removeAttribute('aria-invalid');
-      f.classList.remove('input--error');
-      var g = f.closest('.form-group');
-      if (g) { g.classList.remove('form-group--error'); }
-      if (f.dataset.baseDescribedby) { f.setAttribute('aria-describedby', f.dataset.baseDescribedby); }
-      else { f.removeAttribute('aria-describedby'); }
-    });
-  }
-
-  function messageFor(f) {
-    var v = f.value;
-    if (f.dataset.requiredMsg && v.trim() === '') { return f.dataset.requiredMsg; }
-    if (f.dataset.emailMsg && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) { return f.dataset.emailMsg; }
-    if (f.dataset.minlengthMsg && v.length < parseInt(f.dataset.minlength, 10)) { return f.dataset.minlengthMsg; }
-    return null;
-  }
-
-  function showFieldError(f, message) {
-    var group = f.closest('.form-group');
-    if (group) { group.classList.add('form-group--error'); }
-    f.classList.add('input--error');
-    f.setAttribute('aria-invalid', 'true');
-    var err = document.createElement('p');
-    err.className = 'error-message';
-    err.id = f.id + '-error';
-    var hidden = document.createElement('span');
-    hidden.className = 'visually-hidden';
-    hidden.textContent = 'Error:';
-    err.appendChild(hidden);
-    err.appendChild(document.createTextNode(' ' + message));
-    var anchor = f.closest('.password-wrapper') || f;
-    anchor.parentNode.insertBefore(err, anchor);
-    var base = f.dataset.baseDescribedby;
-    f.setAttribute('aria-describedby', base ? base + ' ' + err.id : err.id);
-  }
-
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
-    clearErrors();
-    var problems = [];
-    fields.forEach(function (f) {
-      var m = messageFor(f);
-      if (m) { problems.push({ field: f, message: m }); }
-    });
-    if (problems.length > 0) {
+    function clearErrors() {
+      document.title = originalTitle;
       var summary = document.getElementById('error-summary');
-      var list = summary.querySelector('ul');
-      problems.forEach(function (p) {
-        showFieldError(p.field, p.message);
-        var li = document.createElement('li');
-        var a = document.createElement('a');
-        a.href = '#' + p.field.id;
-        a.textContent = p.message;
-        li.appendChild(a);
-        list.appendChild(li);
+      if (summary) { summary.hidden = true; summary.querySelector('ul').innerHTML = ''; }
+      Array.prototype.forEach.call(form.querySelectorAll('.error-message'), function (e) { e.remove(); });
+      fields.forEach(function (f) {
+        f.removeAttribute('aria-invalid');
+        f.classList.remove('input--error');
+        var g = f.closest('.form-group');
+        if (g) { g.classList.remove('form-group--error'); }
+        if (f.dataset.baseDescribedby) { f.setAttribute('aria-describedby', f.dataset.baseDescribedby); }
+        else { f.removeAttribute('aria-describedby'); }
       });
-      summary.hidden = false;
-      document.title = 'Error: ' + originalTitle;
-      summary.focus();
-      return;
     }
-    /* A password left visible goes back to hidden on submit, so the browser
-       does not offer it as an autofill value on plain inputs. */
-    Array.prototype.forEach.call(document.querySelectorAll('[data-show-password]'), function (button) {
-      var input = document.getElementById(button.getAttribute('aria-controls'));
-      if (input && input.type === 'text') {
-        input.type = 'password';
-        button.textContent = 'Show';
-        button.setAttribute('aria-label', 'Show password');
+
+    function messageFor(f) {
+      var v = f.value;
+      if (f.dataset.requiredMsg && v.trim() === '') { return f.dataset.requiredMsg; }
+      if (f.dataset.emailMsg && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) { return f.dataset.emailMsg; }
+      if (f.dataset.minlengthMsg && v.length < parseInt(f.dataset.minlength, 10)) { return f.dataset.minlengthMsg; }
+      if (f.dataset.pdfMsg && v && !/\.pdf$/i.test(v)) { return f.dataset.pdfMsg; }
+      return null;
+    }
+
+    function showFieldError(f, message) {
+      var group = f.closest('.form-group');
+      if (group) { group.classList.add('form-group--error'); }
+      f.classList.add('input--error');
+      f.setAttribute('aria-invalid', 'true');
+      var err = document.createElement('p');
+      err.className = 'error-message';
+      err.id = f.id + '-error';
+      var hidden = document.createElement('span');
+      hidden.className = 'visually-hidden';
+      hidden.textContent = 'Error:';
+      err.appendChild(hidden);
+      err.appendChild(document.createTextNode(' ' + message));
+      var anchor = f.closest('.password-wrapper') || f;
+      anchor.parentNode.insertBefore(err, anchor);
+      var base = f.dataset.baseDescribedby;
+      f.setAttribute('aria-describedby', base ? base + ' ' + err.id : err.id);
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var submit = form.querySelector('button[type="submit"]');
+      if (submit && submit.getAttribute('aria-disabled') === 'true') { return; }
+      clearErrors();
+      var problems = [];
+      fields.forEach(function (f) {
+        var m = messageFor(f);
+        if (m) { problems.push({ field: f, message: m }); }
+      });
+      if (problems.length > 0) {
+        var summary = document.getElementById('error-summary');
+        var list = summary.querySelector('ul');
+        problems.forEach(function (p) {
+          showFieldError(p.field, p.message);
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.href = '#' + p.field.id;
+          a.textContent = p.message;
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+        summary.hidden = false;
+        document.title = 'Error: ' + originalTitle;
+        summary.focus();
+        return;
+      }
+      /* A password left visible goes back to hidden on submit, so the browser
+         does not offer it as an autofill value on plain inputs. */
+      Array.prototype.forEach.call(document.querySelectorAll('[data-show-password]'), function (button) {
+        var input = document.getElementById(button.getAttribute('aria-controls'));
+        if (input && input.type === 'text') {
+          input.type = 'password';
+          button.textContent = 'Show';
+          button.setAttribute('aria-label', 'Show password');
+        }
+      });
+      if (form.hasAttribute('data-upload')) { startUpload(form); return; }
+      var action = form.getAttribute('action');
+      if (action && action !== '#') { window.location.href = action; return; }
+      var success = document.getElementById('form-success');
+      if (success) {
+        var emailField = form.querySelector('input[type="email"]');
+        var slot = success.querySelector('[data-success-email]');
+        if (slot && emailField) { slot.textContent = emailField.value.trim(); }
+        form.hidden = true;
+        success.hidden = false;
+        success.focus();
       }
     });
-    var action = form.getAttribute('action');
-    if (action && action !== '#') { window.location.href = action; return; }
-    var success = document.getElementById('form-success');
-    if (success) {
-      var emailField = form.querySelector('input[type="email"]');
-      var slot = success.querySelector('[data-success-email]');
-      if (slot && emailField) { slot.textContent = emailField.value.trim(); }
-      form.hidden = true;
-      success.hidden = false;
-      success.focus();
+  }
+
+  /* ---------- Upload flow (rules R46, R26) ----------
+     Progress is page text in a polite status region, throttled to stage
+     changes; completion is a focused success banner. No toasts, no spinner
+     without text. The staged delays stand in for the backend's SSE updates. */
+
+  /* Choosing a file confirms the selection in the same polite region, so a
+     blind student hears what was picked before committing to Upload (R46). */
+  (function () {
+    var uploadForm = document.querySelector('form[data-upload]');
+    var fileInput = uploadForm ? uploadForm.querySelector('input[type="file"]') : null;
+    var status = document.querySelector('[data-upload-status]');
+    if (!fileInput || !status) { return; }
+    fileInput.addEventListener('change', function () {
+      var f = fileInput.files && fileInput.files[0];
+      if (!f) { status.textContent = ''; return; }
+      var kb = f.size / 1024;
+      var size = kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : Math.max(1, Math.round(kb)) + ' KB';
+      status.textContent = 'Selected: ' + f.name + ' (' + size + ')';
+    });
+  })();
+
+  function addDocumentToList(name) {
+    var list = document.getElementById('document-list');
+    if (!list) { return; }
+    var li = document.createElement('li');
+    li.className = 'doc-item';
+    var h3 = document.createElement('h3');
+    h3.textContent = name;
+    var meta = document.createElement('p');
+    meta.className = 'doc-item__meta';
+    meta.textContent = '24 flashcards. Ready to study.';
+    var p = document.createElement('p');
+    var a = document.createElement('a');
+    a.href = 'study.html';
+    a.textContent = 'Study ' + name;
+    p.appendChild(a);
+    li.appendChild(h3);
+    li.appendChild(meta);
+    li.appendChild(p);
+    list.appendChild(li);
+    /* The list heading carries the count, so heading navigation reports how
+       many documents there are before the student reads a single one. */
+    var heading = document.getElementById('documents-heading');
+    if (heading) {
+      var n = list.children.length;
+      heading.textContent = n === 1 ? '1 document' : n + ' documents';
     }
-  });
+  }
+
+  function startUpload(uploadForm) {
+    var input = uploadForm.querySelector('input[type="file"]');
+    var name = (input.value || '').replace(/^.*[\\\/]/, '');
+    var status = document.querySelector('[data-upload-status]');
+    var submit = uploadForm.querySelector('button[type="submit"]');
+    var successBanner = document.getElementById('upload-success');
+    submit.setAttribute('aria-disabled', 'true');
+    var stages = ['Uploading ' + name, 'Processing: extracting text', 'Processing: generating flashcards'];
+    var i = 0;
+    if (status) { status.textContent = stages[0]; }
+    var timer = window.setInterval(function () {
+      i++;
+      if (i < stages.length) {
+        if (status) { status.textContent = stages[i]; }
+        return;
+      }
+      window.clearInterval(timer);
+      if (status) { status.textContent = ''; }
+      submit.removeAttribute('aria-disabled');
+      var text = successBanner.querySelector('[data-upload-success-text]');
+      text.textContent = name + ' is ready with 24 flashcards.';
+      var link = successBanner.querySelector('a');
+      if (!link) {
+        var p = document.createElement('p');
+        link = document.createElement('a');
+        link.href = 'study.html';
+        p.appendChild(link);
+        successBanner.appendChild(p);
+      }
+      link.textContent = 'Study ' + name;
+      successBanner.hidden = false;
+      successBanner.focus();
+      addDocumentToList(name);
+      uploadForm.reset();
+    }, 800);
+  }
+
+  /* Static demo state for figures: your-documents.html?demo=processing */
+  if (window.location.search.indexOf('demo=processing') !== -1) {
+    var demoStatus = document.querySelector('[data-upload-status]');
+    var demoSubmit = document.querySelector('form[data-upload] button[type="submit"]');
+    if (demoStatus) { demoStatus.textContent = 'Processing: extracting text'; }
+    if (demoSubmit) { demoSubmit.setAttribute('aria-disabled', 'true'); }
+  }
+
+  /* ---------- Study loop (rules R50-R55) ----------
+     Focus is the announcement mechanism: the question heading carries the
+     card position as its description; revealing the answer focuses it;
+     grading refocuses the next question. No timers, no animation: nothing
+     moves until the student presses a key. */
+  (function () {
+    var card = document.querySelector('[data-study-card]');
+    if (!card) { return; }
+    var cards = [
+      { q: 'What does WCAG stand for?', a: 'Web Content Accessibility Guidelines.' },
+      { q: 'Which WCAG success criterion covers reflow at 400% zoom?', a: '1.4.10 Reflow, level AA.' },
+      { q: 'Why does EVIS avoid a confirm-password field?', a: 'It doubles typing and failure modes; the Show password button covers verification instead.' }
+    ];
+    var position = document.getElementById('card-position');
+    var question = document.getElementById('card-question');
+    var answer = document.getElementById('card-answer');
+    var answerText = document.getElementById('card-answer-text');
+    var summary = document.getElementById('session-summary');
+    var summaryTitle = document.getElementById('session-summary-title');
+    var summaryText = summary.querySelector('[data-session-summary-text]');
+    var endRow = document.querySelector('[data-end-session]').closest('p');
+    var index = 0;
+    var reviewed = 0;
+
+    function refocus(el) { el.blur(); el.focus(); }
+    function render() {
+      position.textContent = 'Card ' + (index + 1) + ' of ' + cards.length;
+      question.textContent = cards[index].q;
+      answerText.textContent = cards[index].a;
+      answer.hidden = true;
+    }
+    function finish(title, text) {
+      card.hidden = true;
+      endRow.hidden = true;
+      summaryTitle.textContent = title;
+      summaryText.textContent = text;
+      summary.hidden = false;
+      summary.focus();
+    }
+
+    render();
+    question.focus();
+
+    document.querySelector('[data-show-answer]').addEventListener('click', function () {
+      answer.hidden = false;
+      /* Focus goes to the answer text itself, not to its wrapper, so the
+         answer is the first thing spoken after "Show answer". */
+      answerText.focus();
+    });
+    document.querySelector('[data-repeat-question]').addEventListener('click', function () { refocus(question); });
+    document.querySelector('[data-repeat-answer]').addEventListener('click', function () { refocus(answerText); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-grade]'), function (button) {
+      button.addEventListener('click', function () {
+        reviewed++;
+        if (index + 1 < cards.length) {
+          index++;
+          render();
+          refocus(question);
+        } else {
+          finish('Session complete', 'You reviewed ' + reviewed + ' cards. Next review: in 4 days.');
+        }
+      });
+    });
+    document.querySelector('[data-end-session]').addEventListener('click', function () {
+      finish('Session saved', 'You reviewed ' + reviewed + ' of ' + cards.length + ' cards. The remaining cards stay in your queue.');
+    });
+  })();
 })();
 ```
 
+
 ## 9. The other EVIS screens
 
-The auth screens set the patterns; every other EVIS screen reuses them. Requirements per screen, in the same rule language:
+The auth screens set the patterns; the two screens the product is actually used for — uploading a document and studying what comes out of it — reuse them exactly. These walkthroughs use the same format as [section 3](#3-how-a-blind-student-signs-in-and-registers): keys pressed, what is heard, what the page must provide. Every quoted string is the exact accessible name, description, or page text the reference implementation exposes (machine-read from the accessibility tree in [8.7](#87-reference-implementation-validated)); where a screen reader’s phrasing varies, it is marked *to confirm*.
 
 ### 9.1 Document upload
 
-- File input with a real visible label ("Choose a document") — follow the [GOV.UK file upload component](https://design-system.service.gov.uk/components/file-upload/); no drag-and-drop-only zone.
-- Do **not** put `required` on the file input: JAWS can announce a required empty file input as invalid on page entry (TetraLogical JAWS table — **to confirm**), which is exactly why R10 bans `required`.
-- Upload progress and completion as page content with `role="status"`, never a toast (R27); completion message focused, like a success banner (R26): "Your document has been uploaded."
-- The same error machinery for rejected files (wrong format, too large): summary + inline message with the reason in plain words (R20–R23).
+The student is signed in and on **Your documents**. The first time she arrives (straight from sign-in) focus is on the "You are now signed in" banner; on later visits the page starts at the top. She uploads `chapter1.pdf`.
+
+| # | Student does (keys) | What the student hears (to confirm) | What the page must provide |
+|---|---|---|---|
+| 1 | `H` to survey the page | "Your documents, heading level 1" → "3 documents, heading level 2" | One h1; the document list sits under an h2 that **states the count**, so she knows the size of her library before reading a single item (R48) |
+| 2 | `H` again | "chapter1.pdf, heading level 3" | Each document is a heading — heading navigation, the most common screen-reader strategy, reaches every document (R48) |
+| 3 | Down-arrow through the item | "24 flashcards. Ready to study. 3 are due today." → "Study chapter1.pdf, link" | State and next action **in words**, never a colour or an icon (R48, R35); every link names its document — the links list shows "Study chapter1.pdf", never three identical "Study" links (R48) |
+| 4 | `H` again | "biology-notes.pdf, heading level 3" → "Processing: generating flashcards. Started 2 minutes ago." → "You can leave this page. The flashcards appear here when it finishes." | A processing document says so in words and says it is safe to leave — without this sentence a blind student waits on the page, unable to tell that anything is happening (R46, R48) |
+| 5 | `H` again | "lecture-05.pdf, heading level 3" → "Failed: we could not read this file." → "Upload a readable version of lecture-05.pdf, link" | A failure says what to do next, and the recovery link jumps straight to the file input (R49); "failed" is text, not a red tint (R35) |
+| 6 | `H` | "Upload a document, heading level 2" | The upload form has its own heading, reachable the same way (R48) |
+| 7 | `Tab` | "Choose a PDF, button" (the file input's browse control; NVDA/JAWS phrasing varies) followed by the hint: "PDF files only, up to 50 MB. Processing takes a few minutes and you can leave this page while it works." | A real `<input type="file">` with a visible `<label>`; the format rule is stated **before** the field in a hint tied with `aria-describedby`, so the student hears it before choosing, not as an error after (R47); `accept=".pdf"` pre-filters the dialog; **no `required` attribute** (R10) |
+| 8 | `Space` | The operating system's own file dialog opens — fully accessible; the student navigates or types the path and presses `Enter` | The native picker does the work (F02_SWR02) — the [GOV.UK file upload component](https://design-system.service.gov.uk/components/file-upload/) takes the same approach; no drag-and-drop-only zone, no custom widget re-implementing what the OS already does accessibly |
+| 9 | (Dialog closes) | "Selected: chapter1.pdf (1.2 MB)" | The choice is confirmed in a polite `role="status"` region as page text — the student knows what she picked **before** committing to Upload (R46) |
+| 10 | `Tab`, `Space` on Upload | "Upload, button" → then stage announcements as they change: "Uploading chapter1.pdf" → "Processing: extracting text" → "Processing: generating flashcards" | Progress is page text in the same polite live region, **throttled to stage changes** — never a percentage-per-tick stream, never a toast, never a spinner without words (R46, R27). These stages are exactly what the backend's SSE requirement (F03_SWR_05) will feed; the button is held with `aria-disabled` so double-submitting is impossible |
+| 11 | (Finished) | Focus jumps to the banner: "Upload complete, heading level 2 … chapter1.pdf is ready with 24 flashcards." → `Tab`: "Study chapter1.pdf, link" | Completion is a **focused** banner naming the file and what came out of it, with a link straight into study (R49, R26); the new document joins the list as a heading and the count heading updates to "4 documents" |
+| 12 | (Mistake variant) submits with nothing chosen, or with a `.txt` file | Title "Error: Your documents – EVIS"; focus on: "There is a problem … Select a PDF file to upload, link" / "Select a PDF file. Other file types are not supported., link" | The same error machinery as every other form (R20–R23): "Error: " title, focused summary, one link to the field, identical inline wording. The backend independently rejects non-PDF uploads with HTTP 400 ([13.1](#131-what-exists-today-checked-2026-11-16)) — the two messages must stay in step |
+
+Exact wording for this screen (source of truth for copy):
+
+| Element | Exact wording |
+|---|---|
+| Page title / h1 | "Your documents – EVIS" / "Your documents" |
+| List heading | "3 documents" (count kept current) |
+| Ready document meta | "24 flashcards. Ready to study. 3 are due today." |
+| Processing document meta | "Processing: generating flashcards. Started 2 minutes ago." + "You can leave this page. The flashcards appear here when it finishes." |
+| Failed document meta | "Failed: we could not read this file." |
+| Failed document action | "Upload a readable version of lecture-05.pdf" |
+| Upload heading / label | "Upload a document" / "Choose a PDF" |
+| File hint | "PDF files only, up to 50 MB. Processing takes a few minutes and you can leave this page while it works." |
+| Selection confirmation | "Selected: chapter1.pdf (1.2 MB)" |
+| Progress stages | "Uploading chapter1.pdf" → "Processing: extracting text" → "Processing: generating flashcards" |
+| Success banner | "Upload complete" / "chapter1.pdf is ready with 24 flashcards." + "Study chapter1.pdf" |
+| Errors | "Select a PDF file to upload" · "Select a PDF file. Other file types are not supported." |
+
+**JAWS / VoiceOver / TalkBack notes:** the file input is the one element whose announcement differs most between readers — JAWS may say "browse button", VoiceOver "Choose a PDF, button, group"; all three read the label we give it, which is why the label and hint carry the format rule. iOS opens the document picker sheet after a double-tap; TalkBack reads the hint after the control name. None of these need page changes — they are why the label and hint exist. The old worry that JAWS can announce an empty `required` file input as invalid on page entry (TetraLogical tables) is designed away: R10 bans `required` everywhere.
+
+**Low-vision variant:** at 400% zoom the list, form, and status line stay in one column (R39); progress is 25px bold text, not a 4px progress bar she has to lean in to find; the success banner is solid high-contrast green (8.38:1), not a pastel toast that fades while she is still turning her head.
 
 ### 9.2 Study session (flashcards)
 
-- Every card action is a labelled button ("Show answer", "Next card", "I knew it", "I missed it") activatable with Space/Enter; no gesture-only or hover-only interactions.
-- Card flip is announced: the answer text lives in a `role="status"` region (or receives focus) so the screen reader reads it immediately — a blind student must never have to hunt for the flipped content.
-- Position is spoken with every card: "Card 3 of 20" as part of the status text.
-- No timers that cannot be paused; any countdown is announced and extendable (R42 spirit).
-- 25px text, single column, both themes, focus halo on every control (R29, R32–R39).
+She activates "Study chapter1.pdf" and lands on the session. Three cards are due. The page says so up front, and it makes one promise in plain words: "Nothing on this page changes until you press a button."
+
+| # | Student does (keys) | What the student hears (to confirm) | What the page must provide |
+|---|---|---|---|
+| 1 | (Page loads) | Focus is already on the question: "What does WCAG stand for?, heading level 2, Card 1 of 3" | Focus moves to the card on load (R43 pattern); the card region is **named by its position** and the question carries "Card 1 of 3" in `aria-describedby`, so the position is spoken with every card — she never has to ask where she is in the deck (R51) |
+| 2 | `Tab`, `Space` on "Repeat question" | The question is read again, with the position | A visible Repeat button — the keyboard equivalent of the SWR's "Repeat" voice command (F06_SWR_04) — implemented as focus movement, so the screen reader re-reads the text exactly as rendered (R54) |
+| 3 | `Tab`, `Space` on "Show answer" | Focus moves to the answer text: "Web Content Accessibility Guidelines." | The answer is revealed **in place** — no modal, no flip animation, no transition, nothing that could shake under magnification (R52). The answer is the first thing spoken after the press because focus lands on the answer text itself, not on a wrapper |
+| 4 | `Tab`, `Space` on "Repeat answer" | The answer is read again | Same Repeat pattern for the answer (R54) |
+| 5 | `Tab` through the grades | "How well did you recall this card?, group" → "Again, button, Review in 10 minutes" → "Hard, button, Review in 1 day" → "Good, button, Review in 4 days" → "Easy, button, Review in 9 days" | Four grade buttons in a named group; each button's accessible name includes the interval the scheduler will apply, so the grade is an informed choice, not a guess (R53, F05_SWR04). The intervals come from the FSRS state, never from hard-coded copy |
+| 6 | `Space` on "Good" | Focus jumps to the next question: "Which WCAG success criterion covers reflow at 400% zoom?, heading level 2, Card 2 of 3" | Grading saves the result, advances the card, hides the answer again, and refocuses the question — one keypress, whole loop (R53). The region name follows the position |
+| 7 | (Any time) `Tab` to "End session", `Space` | Focus moves to: "Session saved, heading level 2 … You reviewed 1 of 3 cards. The remaining cards stay in your queue." | The session can always be ended early, and ending says what happens to the rest (R55, F06_SWR_05's "stop" command). The card and its controls leave the page, so nothing behind the summary can still be activated |
+| 8 | (Last card graded) | Focus moves to: "Session complete, heading level 2 … You reviewed 3 cards. Next review: in 4 days." | Finishing the queue says when the next review happens (R55, F05_SWR06); the summary is a focused banner, read automatically (R26 pattern) |
+
+Exact wording for this screen:
+
+| Element | Exact wording |
+|---|---|
+| Page title / h1 | "Study chapter1.pdf – EVIS" / "Study chapter1.pdf" |
+| Intro line | "3 of 24 flashcards are due today. Nothing on this page changes until you press a button." |
+| Position | "Card 1 of 3" (region name + question description, updated per card) |
+| Labels | "Question" · "Answer" · "How well did you recall this card?" |
+| Buttons | "Repeat question" · "Show answer" · "Repeat answer" · "End session" |
+| Grades | "Again Review in 10 minutes" · "Hard Review in 1 day" · "Good Review in 4 days" · "Easy Review in 9 days" |
+| Early-end summary | "Session saved" / "You reviewed 1 of 3 cards. The remaining cards stay in your queue." |
+| Completion summary | "Session complete" / "You reviewed 3 cards. Next review: in 4 days." |
+
+**Screen reader notes.** The Space caveat is real: in NVDA's browse mode `Space` means page-down, and JAWS has its own quick keys — so F05_SWR03's "flip with Space" ships as a **button**, which every reader activates the same way; a page-level shortcut may be added later only while focus is not in a text field (R56). VoiceOver announces the grade group label before the four buttons; TalkBack reads the interval as part of each button's name — both fine, both verified in the tree.
+
+**Low-vision variant:** question and answer render at ~32px in the same spot on the screen — her magnifier viewport does not move when the answer appears, because nothing animates and nothing re-layouts above the answer (R52). The grade buttons stretch to full width at 400% zoom, each with a 4px outline and yellow halo on focus (R29). The idle check in the harness proves what the intro line promises: leave the page untouched for 2.5 seconds and nothing has moved (R50).
 
 ### 9.3 Progress
 
@@ -1121,9 +1877,13 @@ The auth screens set the patterns; every other EVIS screen reuses them. Requirem
 
 ### 9.4 Display settings
 
-- Theme picker: radio buttons with visible labels — "Light", "Dark", "System default" — persisted (R32). Never a toggle hidden behind an icon.
-- A text-size setting is optional but cheap: 100% / 125% / 150% scaling the `rem` root (R37); it must never break reflow (R39).
-- If voice is added later, its settings live here, user-enabled, with rate/volume controls ([12.1](#121-voice-interaction-deferred)) — speech settings and display settings stay separate.
+The Display settings disclosure is in the header of **every** page, including sign-in — accessibility controls are not locked behind the login (R57).
+
+- One button, "Display settings": collapsed it costs exactly one Tab stop; expanding moves focus to the checked radio; collapsing returns focus to the button.
+- Contents are two labelled radio groups in fieldsets with legends — Theme: "Light" / "Dark" / "System"; Text size: "100%" / "125%" / "150%". Never a toggle hidden behind an icon, never a slider.
+- Changes apply immediately and persist across pages and sessions (localStorage); light is the default when the OS has no colour-scheme preference, otherwise the OS preference is followed until the student chooses (R32).
+- Text size scales only the `rem` root (R37); because all sizing is in `rem`, the single-column reflow behaviour (R39) is preserved — re-verify at 150% + 320px when the harness is ported ([11.1](#111-automated-checks-already-prototyped)).
+- If voice is added later, its settings live here too, user-enabled, with rate/volume controls ([12.1](#121-voice-interaction-deferred)) — speech settings and display settings stay separate.
 - No screen-reader detection anywhere (R45).
 
 ## 10. WCAG 2.2 AA checklist
@@ -1170,7 +1930,7 @@ Five layers. Layers 1–2 and 4 are cheap and run on every UI change (repository
 
 ### 11.1 Automated checks (already prototyped)
 
-The reference harness (`check.js`, [8.7](#87-reference-implementation-validated)) runs headless Chromium and asserts, per page: zero axe-core violations for `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`; plus 57 behavioural/tree checks (listed in [8.7](#87-reference-implementation-validated)). **Result on the reference pages: 57/57 passed, 2026-11-16.** For the real app: port this harness into the frontend repo when the auth pages land, run it in CI per PR.
+The reference harness (`check.js`, [8.7](#87-reference-implementation-validated)) runs headless Chromium and asserts, per page: zero axe-core violations for `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`; plus 113 behavioural/tree checks (listed in [8.7](#87-reference-implementation-validated)). **Result on the reference pages: 113/113 passed, 2026-11-17.** For the real app: port this harness into the frontend repo when the auth pages land, run it in CI per PR.
 
 ### 11.2 Keyboard scripts (no screen reader needed)
 
@@ -1246,6 +2006,20 @@ The original brief included voice commands. Research says: do not build app voic
 - **Voice-assistant research warns:** Abdolrahmani et al. 2020 ([full text](https://dl.acm.org/doi/fullHtml/10.1145/3368426)) found blind users hindered by assistants they could not tune — e.g. no control over speech rate. Any EVIS voice must expose rate/volume and a full keyboard equivalent.
 
 **Rules for when voice arrives (already R45):** never speak passwords or personal data; user-enabled, never automatic; never fires while a screen reader owns the audio; speech settings separate from display settings ([9.4](#94-display-settings)); every voice action has a keyboard equivalent. The proven accessible model is Accessibyte's: a self-voicing *mode* the student switches on ([6.2](#62-accessibyte--the-closest-product-to-evis)), coexisting with their screen reader, not replacing it.
+**Every SWR voice command already has a v1 keyboard path.** Deferring voice blocks nothing in Features 2, 5, and 6, because each spoken command maps to a control that ships now:
+
+| Voice command (source) | The v1 keyboard/button equivalent |
+|---|---|
+| "Upload document" (F02_SWR03) | Tab to "Choose a PDF", `Space` opens the native picker, "Upload" submits ([9.1](#91-document-upload)) |
+| Spoken upload feedback (F03_SWR04, listed inside Feature 2) | The polite status region announces each stage through the student's own screen reader (R46) |
+| "Read the card" (F05_SWR02) | The question is a focused heading, read on every card change; "Repeat question" re-reads it (R51, R54) |
+| "Flip" / Space (F05_SWR03) | "Show answer" button — Space on a focused button works in every reader; a page-level Space shortcut is an enhancement only (R52, R56) |
+| "Again / Hard / Good / Easy" (F05_SWR04) | Four grade buttons, intervals inside the labels (R53) |
+| "Repeat" (F06_SWR_04) | "Repeat question" / "Repeat answer" buttons (R54) |
+| "Next" / positive grade (F06_SWR_03) | Grading advances to the next card and refocuses the question (R53) |
+| "Stop" (F06_SWR_05) | "End session" button → focused summary (R55) |
+| Spoken session summary (F05_SWR06) | Focused summary banner, read automatically (R26 pattern, R55) |
+| Low-latency speech (F06_SWR_06) | N/A in v1 — the keyboard path has no speech pipeline; the latency budget (SWR02) binds when voice arrives |
 
 ### 12.2 Localisation (deferred)
 
@@ -1264,6 +2038,10 @@ The interface is English-only for now: `lang="en"`, English wording, English err
 **Frontend** (`frontend/`): untouched Vite + React template (React 19.3.1, Vite 8.3.6, TypeScript ~6.0.3). No router, no Tailwind, no tests. `index.html` has `lang="en"` (good) but title `frontend` (violates R1). `src/index.css` uses px font sizing and colours that fail the palette: measured — secondary `#6B6375` on white = 5.73:1 (below the 7:1 target), dark-mode `#9CA3AF` on `#16171D` = 7.04:1 (ok), accent `#AA3BFF` on white = **4.39:1 — fails AA 4.5:1**. The reference palette in [4.2](#42-the-high-contrast-student-themes) replaces all of it. Note: docs describe Next.js/Tailwind/React Aria but the actual code is Vite + React — the reference implementation is framework-free HTML/CSS/JS on purpose, so it ports to either.
 
 **Backend** (`backend/`): FastAPI, Python ≥3.13, uv. **No authentication at all**: no password-hashing library, no JWT/session library; the users domain model has `email`, `full_name`, `role`, `accessibility_prefs` but **no password field**; the SQL `users` table lacks email/password/prefs columns and its role enum does not match the domain model; the only auth-shaped artifact is an `X-User-Role` header stub in the flashcards dependencies. Implementing Feature 8 below implies: add a password-hash column (e.g. argon2 via a maintained library), session or JWT mechanism, email-sending for reset links, and aligning the SQL schema with the domain model. That is backend design work outside this UX research document — flagged here so it is not forgotten.
+**Upload and study pipeline** (`backend/app/`): the document side already matches this document's flow — `ProcessingStatus` runs `UPLOADED` → `PROCESSING` → `COMPLETED` | `FAILED` (in both `app/models/document.py` and `app/doc-processing/domain/models.py`), and non-PDF uploads are rejected at the domain layer (`Document.from_upload` raises `InvalidDocumentError`, returned as HTTP 400 — the error R47's wording wraps). Two gaps against the SWR:
+
+- **No progress events.** F03_SWR_05 requires server-sent events for processing progress, but no `EventSource`, `StreamingResponse`, or `text/event-stream` exists anywhere in the backend. Processing is a blocking `POST /documents/{id}/process` — the doc-processing README warns a 495-page book takes ~50–60 s and ~2 GB RAM, one file at a time. The staged announcements in [9.1](#91-document-upload) are exactly what those events would feed; until they exist, the frontend can only poll or fake stages.
+- **Two conflicting grade scales.** `app/study_sessions_fsrs_progress.py` defines `RecallRating` with three values (`HARD`, `GOOD`, `EASY`) and the FSRS scheduler branches on them — `if HARD … elif GOOD … else: # EASY` — so an `AGAIN` grade would silently be scheduled as `EASY`: a failed recall pushed days into the future instead of minutes. `app/models/review_session.py` separately defines the four-value `AGAIN/HARD/GOOD/EASY` that matches SWR F05_SWR04, but only a unit test imports it; nothing wires it to the scheduler. `FSRSCardState.RELEARNING` is defined but never assigned. The four-grade UI in [9.2](#92-study-session-flashcards) (R53) needs the scheduler fixed first — as it stands, pressing "Again" would do the opposite of what the student means.
 
 ### 13.2 Draft requirement entries for sign-in and registration
 
@@ -1424,8 +2202,8 @@ Every source was fetched and cached on 2026-11-16; quotations and numbers were c
 - **Links:** every URL above was fetched on 2026-11-16 and cached locally; dead or redirected links were fixed or removed. (One Apple page's cache header pointed at the on-screen-keyboard article; the citation was corrected to the VoiceOver gestures URL and re-verified.)
 - **Numbers and quotations:** every statistic and quote in sections 2, 5, and 6 was matched against the cached source text in a second pass, including the participant counts ("we recruited 12 participants … eight blind users and four with low vision" — Dosono; "Fourteen participants with visual disabilities (7 blind, 7 partially sighted)" — Napoli; "all 33 respondents … used password managers" — CISPA).
 - **Contrast ratios:** all pairs in [4.2](#42-the-high-contrast-student-themes) (and the current-template failures in [13.1](#131-what-exists-today-checked-2026-11-16)) recomputed with a relative-luminance script on 2026-11-16.
-- **Reference pages:** axe-core 4.14.1 (WCAG 2.0/2.1/2.2 A+AA tags) plus 57 accessibility-tree/behaviour checks in headless Chromium — 57/57 passed, including the 320px reflow checks in both themes.
-- **Figures:** rendered from the validated pages and visually inspected before embedding.
+- **Reference pages:** axe-core 4.14.1 (WCAG 2.0/2.1/2.2 A+AA tags) plus 113 accessibility-tree/behaviour checks in headless Chromium — 113/113 passed (2026-11-17), including display-settings persistence across pages, the upload selection confirmation and stage announcements, the study focus loop, the no-timers idle check, and 320px reflow in both themes.
+- **Figures:** nine figures rendered from the validated pages, each verified from the pixels before embedding (45/45 checks: background per theme, ink coverage, margins, nothing cut off at the bottom).
 - **What could not be verified here:** spoken screen-reader output. This environment cannot run a screen reader audibly, so all announcement strings come from published support tables and are marked **to confirm**; [11.3](#113-screen-reader-scripts) is the script that resolves them.
 
 ### 14.4 AI-assistance note
@@ -1434,4 +2212,4 @@ Following the convention of `01_StateOfTheArt.txt`:
 
 Ai prompt (Factory Droid): Act as an researcher for implementing the UI/UX for visually impaired students, the UI/UX should be accesible for students that can barely see and that cannot see, so high contrast UI with big fonts etc, voice commands etc, but i need to see the real world examples solution for example how a person that cannot see uses login/register feature etc.
 
-Subsequent instructions from the author: research document only (no application code changes); sign-in with email and password; no voice in the first version; English only, dropping Romanian-specific content and the translation layer for now. All sources were opened and cached, all numbers and quotations re-checked against the cached text, the reference implementation was machine-checked (57/57), and the contrast ratios were recomputed by script — the checks are listed in [14.3](#143-how-this-document-was-checked).
+Subsequent instructions from the author: research document only (no application code changes); sign-in with email and password; no voice in the first version; English only, dropping Romanian-specific content and the translation layer for now. All sources were opened and cached, all numbers and quotations re-checked against the cached text, the reference implementation was machine-checked (113/113, re-run 2026-11-17 after the upload-selection addition), and the contrast ratios were recomputed by script — the checks are listed in [14.3](#143-how-this-document-was-checked).
