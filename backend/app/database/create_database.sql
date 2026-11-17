@@ -13,12 +13,41 @@ WHERE NOT EXISTS (
 
 BEGIN;
 
+-- ==========================================
+-- 1. ENUM TYPES
+-- ==========================================
+
 DO $$
 BEGIN
     CREATE TYPE user_role AS ENUM (
         'student',
         'validator',
         'admin'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE TYPE account_status AS ENUM (
+        'PENDING',
+        'ACTIVE',
+        'SUSPENDED'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE TYPE mentorship_status AS ENUM (
+        'PENDING',
+        'ACTIVE',
+        'REJECTED',
+        'REMOVED'
     );
 EXCEPTION
     WHEN duplicate_object THEN NULL;
@@ -88,16 +117,72 @@ EXCEPTION
 END
 $$;
 
+-- ==========================================
+-- 2. TABLES
+-- ==========================================
+
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    role user_role NOT NULL DEFAULT 'student'
+    role user_role NOT NULL DEFAULT 'student',
+    status account_status NOT NULL DEFAULT 'ACTIVE',
+    verified_by UUID,
+    verified_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_users_verified_by
+        FOREIGN KEY (verified_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS student_validators (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID NOT NULL,
+    validator_id UUID NOT NULL,
+    status mentorship_status NOT NULL DEFAULT 'PENDING',
+    initiated_by UUID NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_sv_student
+        FOREIGN KEY (student_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_sv_validator
+        FOREIGN KEY (validator_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_sv_initiated_by
+        FOREIGN KEY (initiated_by)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uq_student_validator_pair
+        UNIQUE (student_id, validator_id),
+
+    CONSTRAINT ck_sv_different_users
+        CHECK (student_id <> validator_id)
 );
 
 CREATE TABLE IF NOT EXISTS documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID NOT NULL,
+    managed_by_validator_id UUID,
     filename VARCHAR(1024) NOT NULL,
     status processing_status NOT NULL DEFAULT 'UPLOADED',
-    uploaded_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    uploaded_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_documents_student
+        FOREIGN KEY (student_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_documents_validator
+        FOREIGN KEY (managed_by_validator_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS document_sections (
@@ -165,13 +250,20 @@ CREATE TABLE IF NOT EXISTS flashcards (
     question TEXT NOT NULL,
     answer TEXT NOT NULL,
     status approval_status NOT NULL DEFAULT 'DRAFT',
+    validated_by UUID,
+    validated_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_flashcards_deck
         FOREIGN KEY (deck_id)
         REFERENCES decks(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_flashcards_validated_by
+        FOREIGN KEY (validated_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS citations (
@@ -271,6 +363,25 @@ CREATE TABLE IF NOT EXISTS fsrs_states (
         CHECK (lapses >= 0)
 );
 
+-- ==========================================
+-- 3. INDEXES
+-- ==========================================
+
+CREATE INDEX IF NOT EXISTS ix_users_role_status
+    ON users(role, status);
+
+CREATE INDEX IF NOT EXISTS ix_student_validators_student_id
+    ON student_validators(student_id);
+
+CREATE INDEX IF NOT EXISTS ix_student_validators_validator_id
+    ON student_validators(validator_id);
+
+CREATE INDEX IF NOT EXISTS ix_documents_student_id
+    ON documents(student_id);
+
+CREATE INDEX IF NOT EXISTS ix_documents_validator_id
+    ON documents(managed_by_validator_id);
+
 CREATE INDEX IF NOT EXISTS ix_document_sections_document_id
     ON document_sections(document_id);
 
@@ -282,6 +393,9 @@ CREATE INDEX IF NOT EXISTS ix_flashcards_deck_id
 
 CREATE INDEX IF NOT EXISTS ix_flashcards_status
     ON flashcards(status);
+
+CREATE INDEX IF NOT EXISTS ix_flashcards_validated_by
+    ON flashcards(validated_by);
 
 CREATE INDEX IF NOT EXISTS ix_citations_flashcard_id
     ON citations(flashcard_id);
