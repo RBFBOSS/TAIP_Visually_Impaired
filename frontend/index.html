@@ -4,7 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>EVIS</title>
+    <script>
+      /* Re-apply the saved display settings before first paint, so a returning
+         student never sees a flash of the wrong theme or text size (R32, R57). */
+      (function () {
+        try {
+          var theme = window.localStorage.getItem('evis-theme')
+          if (theme === 'light' || theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', theme)
+          }
+          var size = parseInt(window.localStorage.getItem('evis-textsize'), 10)
+          if (size === 100 || size === 125 || size === 150) {
+            document.documentElement.style.fontSize = (125 * size) / 100 + '%'
+          }
+        } catch (e) {
+          /* Storage unavailable: defaults apply. */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

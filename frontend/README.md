@@ -1,78 +1,84 @@
-# React + TypeScript + Vite
+# EVIS frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The student-facing web app for EVIS (Education for Visually Impaired Students).
 
-Currently, two official plugins are available:
+What is here now is the first slice of the interface: **Sign in**, **Create an account**, and the signed-in placeholder they lead to. It is built to the rules in [`01_Documentation/05_Accessible_UIUX_Research.md`](../01_Documentation/05_Accessible_UIUX_Research.md) and ports the validated reference pages from section 8.7 of that document, with the same wording, markup and behaviour.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Running it
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Open the address Vite prints, `http://localhost:5173` by default.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server with hot reload |
+| `npm run build` | Type-check, then build into `dist/` |
+| `npm run lint` | ESLint |
+| `npm run preview` | Serve the built app |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Test account
 
-```
+Sign-in runs against a mock in the browser. No backend is involved, so nothing you do here touches the database.
+
+| Field | Value |
+|---|---|
+| Email | `student@example.com` |
+| Password | `evis test password` |
+
+Accounts you create on the Create an account page work for the rest of that page session, and disappear when you reload.
+
+## Routes
+
+| URL | Page |
+|---|---|
+| `/` | Redirects to `/documents` when signed in, otherwise to `/sign-in` |
+| `/sign-in` | Sign in |
+| `/create-account` | Create an account |
+| `/account-created` | Registration success |
+| `/documents` | Signed-in placeholder, with Sign out |
+| anything else | Page not found |
+
+There is no reset-password page yet, so the sign-in page has no "Forgot your password?" link. A link that goes nowhere costs a blind student more than no link at all.
+
+## What is mocked
+
+`src/auth/mockAuthService.ts` is the only thing standing in for a server. It implements the `AuthService` interface in `src/auth/types.ts`:
+
+- the one seeded account above
+- accounts created in the browser, held in memory only
+- about 300 ms of delay on sign-in, registration and sign-out
+- `Check your email address and password` for any wrong combination, which never says which of the two was wrong (rule R25)
+- `An account with this email address already exists` for a duplicate email
+
+When the FastAPI backend is ready, write a real `AuthService` and change the one marked line at the top of `src/auth/AuthProvider.tsx`. Nothing else in the app talks to a server.
+
+A session holds only the name and the email. "Keep me signed in" puts it in `localStorage`; leaving the box unchecked uses `sessionStorage`, so it goes when the tab closes (rule R41). An account created on the registration page is always tab-scoped, because that page never asks.
+
+## Rules implemented
+
+| Rules | Where they show up |
+|---|---|
+| R1–R5, R7 | Unique titles ending in "– EVIS", `lang="en"`, a skip link into `<main>`, one `h1` per page, the form first in `<main>`, and one set of words everywhere: "Sign in", "Create an account", "Sign out" |
+| R8–R15 | Labels above fields, hints and errors tied on with `aria-describedby`, the right `autocomplete` tokens, `noValidate`, no `required` / `maxlength` / `autofocus` anywhere, validation on submit only, entered values kept, `spellcheck="false"` on email |
+| R16–R19 | One password field, the 15-character rule stated before it, Show/Hide with `aria-controls` and a hidden status region, re-masked on submit, paste never blocked |
+| R20–R25 | The "Error: " title prefix, a focused error summary with one link per problem, each link moving focus to its field, the same message inline above the field with a visually-hidden "Error: ", `aria-invalid`, the left border on the group, and the one generic sign-in message |
+| R26–R28 | Focused `role="alert"` success banners, no toasts, "Signed in as …" next to an explicit Sign out |
+| R29–R31 | A 4px outline plus an 8px yellow halo on focus, yellow background and black text on focused links, focus order matching DOM order |
+| R32–R36 | Light, dark and system themes at 7:1 contrast or better, forced-colors support, links underlined as well as coloured |
+| R37–R40 | 20px base text and 25px controls through a 125% root, all sizing in `rem`, one 40rem column, reflow at 320px |
+| R41 | "Keep me signed in", unchecked by default, with the shared-computer hint |
+| R43 | Every route change updates the title and moves focus to the banner, or to the heading when there is no banner |
+| R57 | Display settings in the header of every page, before sign-in, saved and re-applied before first paint |
+
+Two deliberate changes from the reference stylesheet: the root size is a percentage rather than a fixed `20px`, so the browser's own font-size setting still applies, and `color-scheme` is set per theme so native controls and autofill colours match it.
+
+## Not done yet
+
+- Voice commands (deferred, section 12.1)
+- Reset your password (section 8.3)
+- Document upload and study sessions (sections 9.1 and 9.2). `/documents` is a placeholder
+- An automated accessibility suite in CI. The checks in section 11 were run against this branch with a throwaway script that is not committed; see the pull request for what they covered and what they found

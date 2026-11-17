@@ -1,111 +1,371 @@
+/* EVIS frontend styles, ported from the validated reference stylesheet in
+   section 8.7 of 01_Documentation/05_Accessible_UIUX_Research.md.
+   All colour pairs verified for contrast (see the research document):
+   light: text #0B0C0C on #FFFFFF 19.6:1, secondary #505A5F 7.1:1,
+          link #003078 12.4:1, error #942514 8.3:1, success #005A30 on white 8.4:1
+   dark:  text #FFFFFF on #000000 21:1, secondary #B1B4B6 10.1:1,
+          link #8CC8FF 11.8:1, error #FF9A8F 10.3:1, success #7FE5A0 on black 13.6:1 */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --bg: #ffffff;
+  --text: #0b0c0c;
+  --secondary: #505a5f;
+  --link: #003078;
+  --error: #942514;
+  --success-bg: #005a30;
+  --success-text: #ffffff;
+  --focus: #ffdd00;
+  --border: #0b0c0c;
+  color-scheme: light;
 }
-
+[data-theme='dark'] {
+  --bg: #000000;
+  --text: #ffffff;
+  --secondary: #b1b4b6;
+  --link: #8cc8ff;
+  --error: #ff9a8f;
+  --success-bg: #7fe5a0;
+  --success-text: #000000;
+  --focus: #ffdd00;
+  --border: #ffffff;
+  color-scheme: dark;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  :root:not([data-theme='light']) {
+    --bg: #000000;
+    --text: #ffffff;
+    --secondary: #b1b4b6;
+    --link: #8cc8ff;
+    --error: #ff9a8f;
+    --success-bg: #7fe5a0;
+    --success-text: #000000;
+    --focus: #ffdd00;
+    --border: #ffffff;
+    color-scheme: dark;
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+html {
+  font-family: 'Atkinson Hyperlegible Next', Verdana, Tahoma, Arial, sans-serif;
+  /* 125% of the browser default (16px) is the reference's 20px base, and it
+     keeps respecting the browser's own font-size preference. Display settings
+     scale this root value; everything else is rem and scales with it (R37). */
+  font-size: 125%;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
 }
-
 body {
   margin: 0;
 }
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.container {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: 2.4rem;
+  line-height: 1.1;
+  margin: 0 0 1.5rem;
 }
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin: 0 0 1rem;
+}
+/* The sizes above assume a wider viewport. At 320px with 150% text the h1 is
+   72px and a single heading word ("account", "problem") is wider than the
+   container's content box, so it breaks out of the padding. Below this width
+   the display sizes step down. px is deliberate: rem in a media query is the
+   browser's initial 16px, so it would not track the student's text-size
+   choice, and it is that choice which makes the heading too wide. */
+@media (max-width: 360px) {
+  h1 {
+    font-size: 2rem;
+  }
+  h2 {
+    font-size: 1.3rem;
   }
 }
 p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10;
+  background: var(--focus);
+  color: #000000;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+.site-header {
+  border-bottom: 4px solid var(--border);
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+}
+.brand {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+}
+.brand small {
+  display: block;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--secondary);
+}
+.site-footer {
+  border-top: 4px solid var(--border);
+  margin-top: 3rem;
+  padding: 1rem 0 2rem;
+  color: var(--secondary);
+}
+
+/* Display settings: one disclosure button in the header of every page, so
+   theme and text size are reachable before signing in (R57). Collapsed, it is
+   a single Tab stop before the form. */
+.display-settings {
+  margin-top: 0.75rem;
+}
+.display-settings__toggle {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  min-height: 2.5rem;
+}
+.display-settings__panel {
+  border: 2px solid var(--border);
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+  background: var(--bg);
+}
+.display-settings__panel fieldset {
+  border: 0;
+  margin: 0 0 1.25rem;
+  padding: 0;
+}
+.display-settings__panel fieldset:last-child {
+  margin-bottom: 0;
+}
+.display-settings__panel legend {
+  font-weight: 700;
+  font-size: 1.25rem;
+  padding: 0;
+  margin-bottom: 0.5rem;
+}
+.choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.choice input {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+  accent-color: var(--text);
+  flex: none;
+}
+.choice label {
+  display: inline;
+  font-weight: 400;
+  font-size: 1.25rem;
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.form-group {
+  margin-bottom: 2rem;
+}
+.form-group--error {
+  border-left: 6px solid var(--error);
+  padding-left: 1rem;
+}
+label {
+  display: block;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+.hint {
+  color: var(--secondary);
+  margin: 0 0 0.5rem;
+}
+.error-message {
+  color: var(--error);
+  font-weight: 700;
+  margin: 0 0 0.5rem;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+input[type='email'],
+input[type='text'],
+input[type='password'] {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.75rem;
+  font: inherit;
+  font-size: 1.25rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 0;
+}
+input.input--error {
+  border-color: var(--error);
+  border-width: 3px;
+}
+
+.password-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+.password-wrapper input {
+  /* A basis wide enough to read what was typed, so at narrow widths the Show
+     button drops to its own line instead of squeezing the field to nothing or
+     pushing the page wider than the viewport (R37, R39). */
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.button {
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0;
+  cursor: pointer;
+  min-height: 3rem;
+}
+.button--primary {
+  background: var(--text);
+  color: var(--bg);
+  border: 2px solid var(--border);
+}
+.button--secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.checkbox-row input {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.2rem;
+  flex: none;
+  accent-color: var(--text);
+}
+.checkbox-row label {
+  margin: 0;
+}
+
+/* Unmistakable focus indicator on both themes (WCAG 2.4.7 / 2.4.13, R29). */
+:focus-visible {
+  outline: 4px solid var(--border);
+  outline-offset: 0;
+  box-shadow: 0 0 0 8px var(--focus);
+}
+/* The skip link focuses <main> itself, so the student can see the skip worked.
+   The halo is dropped there because it would wrap the whole page; the outline
+   stays (R2, R29). */
+#main-content:focus-visible {
+  box-shadow: none;
+}
+/* A submit held while the mock answers. Kept to the cursor so the button text
+   stays at full contrast (R33). */
+.button[aria-disabled='true'] {
+  cursor: default;
+}
+a:focus-visible {
+  background: var(--focus);
+  color: #000000;
+}
+
+.error-summary {
+  border: 6px solid var(--error);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.error-summary h2 {
+  margin-top: 0;
+}
+.error-summary a {
+  color: var(--error);
+  font-weight: 700;
+}
+.error-summary ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+/* The format error ends in "like name@example.com", one token no line box here
+   is wide enough to hold at 150% text on a 320px viewport. Left unbroken it
+   pushes the page wider than the viewport, which is what R39 forbids. */
+.error-summary a,
+.error-message {
+  overflow-wrap: anywhere;
+}
+
+.success-banner {
+  background: var(--success-bg);
+  color: var(--success-text);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+.success-banner h2 {
+  margin-top: 0;
+}
+.success-banner p {
+  margin-bottom: 0;
+}
+.success-banner p + p {
+  margin-top: 0.75rem;
+}
+.success-banner a {
+  color: inherit;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  input,
+  .button {
+    border: 2px solid ButtonText;
+  }
+  :focus-visible {
+    outline: 4px solid Highlight;
+    box-shadow: none;
+  }
 }
