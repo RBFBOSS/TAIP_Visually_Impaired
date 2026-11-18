@@ -61,15 +61,15 @@ Decizii cheie de modelare:
 
 ## 3. Pasul 1: Descărcarea și Configurarea Eclipse Modeling Tools
 
-Dacă trebuie să deschideți arborele sau să modificați vizual metamodelul în fața cadrului didactic:
+Dacă trebuie să deschideți arborele sau să modificați vizual metamodelul:
 
-1. **Cerință preliminară**: Asigurați-vă că aveți instalat un Java JDK pe calculator (versiunea 17 sau 21 este recomandată).
+1. **Cerință preliminară**: Java JDK pe calculator (versiunea 17 sau 21 este recomandată).
 2. **Descărcare**:
    * Intrați pe: [eclipse.org/downloads/packages](https://www.eclipse.org/downloads/packages/)
    * **NU** descărcați varianta generică *Eclipse IDE for Java Developers*.
    * Căutați pachetul specific **Eclipse Modeling Tools** și descărcați arhiva pentru sistemul vostru de operare (Windows, macOS sau Linux).
 3. **Pornire**:
-   * Dezarhivați folderul într-o locație comodă (ex: `C:\EclipseModeling` sau `~/tools/eclipse`).
+   * Dezarhivați folderul (ex: `C:\EclipseModeling` sau `~/tools/eclipse`).
    * Porniți direct executabilul `eclipse` / `eclipse.exe` (nu are nevoie de instalator).
    * La pornire, când vă cere un **Workspace**, alegeți orice director și apăsați **Launch**.
 4. **Setare Temă Deschisă (Light Mode)** (recomandat pentru vizibilitate clară la prezentare):
@@ -235,19 +235,17 @@ Fișierul rezultat `sample_deck_instance.xmi` reprezintă serializarea standardi
 * Datorită relațiilor de tip **containment**, XML-ul include cardurile direct în nodul `Deck`, iar citările în nodul `Flashcard`.
 * Dacă trageți fișierul `sample_deck_instance.xmi` în Eclipse, acesta poate fi deschis cu arborele EMF și va afișa datele create în Python.
 
-## 8. Ghid pentru Prezentare la Laborator / Examen
-
-La prezentare, parcurgeți următoarea demonstrație în 4 pași simpli:
+## 8. Utilizare
 
 1. **Arborele Ecore în Eclipse**:
    * Deschideți Eclipse Modeling Tools.
    * Extindeți `flashcard_management.ecore`.
-   * Arătați pachetul rădăcină (cu `Ns URI`), enum-ul `ApprovalStatus`, clasele (`Deck`, `Flashcard`, `Citation`) și relațiile de containment.
-2. **Generarea de Cod (Codegen)**:
-   * Menționați comanda `pyecoregen -e flashcard_management.ecore -o generated_models`.
-   * Arătați rapid fișierul `generated_models/flashcard/flashcard.py` ca dovadă a generării automate a claselor EObject din metamodel.
-3. **Execuția Componentei în Python**:
+   * Localizati pachetul rădăcină (cu `Ns URI`), enum-ul `ApprovalStatus`, clasele (`Deck`, `Flashcard`, `Citation`) și relațiile de containment.
+2. **Generarea de cod (codegen)**:
+   * comanda `pyecoregen -e flashcard_management.ecore -o generated_models`.
+   * fișierul `generated_models/flashcard/flashcard.py` (generare automate a claselor EObject din metamodel).
+3. **Execuția componentei în python**:
    * Deschideți `flashcard_management.py` în VS Code.
    * Rulați `python flashcard_management.py` în terminal pentru a arăta execuția și instanțierea.
-4. **Validarea Persistenței XMI**:
-   * Deschideți `sample_deck_instance.xmi` și arătați conformitatea structurii ierarhice XML cu relațiile din metamodelul inițial.
+4. **Validarea persistenței XMI**:
+   * Deschideți `sample_deck_instance.xmi`. Acesta contine o structura ierarhice XML, confirma cu relațiile din metamodelul inițial.
