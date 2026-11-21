@@ -1,18 +1,3 @@
-\set ON_ERROR_STOP on
-\set db_name 'taip_visually_impaired'
-
-SELECT format('CREATE DATABASE %I', :'db_name')
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM pg_database
-    WHERE datname = :'db_name'
-)
-\gexec
-
-\connect :db_name
-
-BEGIN;
-
 -- ==========================================
 -- 1. ENUM TYPES
 -- ==========================================
@@ -170,7 +155,12 @@ CREATE TABLE IF NOT EXISTS documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL,
     managed_by_validator_id UUID,
+    title VARCHAR(255) NOT NULL DEFAULT '',
     filename VARCHAR(1024) NOT NULL,
+    storage_path VARCHAR(1024) NOT NULL DEFAULT '',
+    content_type VARCHAR(100) NOT NULL DEFAULT 'application/pdf',
+    size_bytes BIGINT NOT NULL DEFAULT 0,
+    sha256 VARCHAR(64),
     status processing_status NOT NULL DEFAULT 'UPLOADED',
     uploaded_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -182,7 +172,10 @@ CREATE TABLE IF NOT EXISTS documents (
     CONSTRAINT fk_documents_validator
         FOREIGN KEY (managed_by_validator_id)
         REFERENCES users(id)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+
+    CONSTRAINT ck_documents_size_bytes
+        CHECK (size_bytes >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS document_sections (

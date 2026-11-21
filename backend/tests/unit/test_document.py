@@ -1,4 +1,4 @@
-from app.models.document import Document, DocumentSection, ProcessingStatus
+from app.models.documents import Document, DocumentSection, ProcessingStatus
 
 
 def make_section(index: int = 0) -> DocumentSection:

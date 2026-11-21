@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from app.models.review_session import (
+from app.models.reviews import (
     RecallRating,
     ReviewLog,
     ReviewSession,
