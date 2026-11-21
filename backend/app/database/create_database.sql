@@ -239,7 +239,8 @@ CREATE TABLE IF NOT EXISTS decks (
 
 CREATE TABLE IF NOT EXISTS flashcards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    deck_id UUID NOT NULL,
+    deck_id UUID,
+    document_id UUID NOT NULL,
     question TEXT NOT NULL,
     answer TEXT NOT NULL,
     status approval_status NOT NULL DEFAULT 'DRAFT',
@@ -262,7 +263,7 @@ CREATE TABLE IF NOT EXISTS flashcards (
 CREATE TABLE IF NOT EXISTS citations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     flashcard_id UUID NOT NULL,
-    section_id UUID NOT NULL,
+    section_id UUID,
     page_number INTEGER,
     source_excerpt TEXT NOT NULL,
 
@@ -278,6 +279,18 @@ CREATE TABLE IF NOT EXISTS citations (
 
     CONSTRAINT ck_citations_page_number
         CHECK (page_number IS NULL OR page_number > 0)
+);
+
+CREATE TABLE IF NOT EXISTS document_processing_summaries (
+    document_id UUID PRIMARY KEY,
+    content TEXT NOT NULL,
+    citation_id UUID NOT NULL,
+    citation_page_number INTEGER NOT NULL,
+    citation_source_excerpt TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT ck_document_processing_summaries_citation_page_number
+        CHECK (citation_page_number > 0)
 );
 
 CREATE TABLE IF NOT EXISTS review_sessions (
@@ -384,6 +397,9 @@ CREATE INDEX IF NOT EXISTS ix_decks_document_id
 CREATE INDEX IF NOT EXISTS ix_flashcards_deck_id
     ON flashcards(deck_id);
 
+CREATE INDEX IF NOT EXISTS ix_flashcards_document_id
+    ON flashcards(document_id);
+
 CREATE INDEX IF NOT EXISTS ix_flashcards_status
     ON flashcards(status);
 
@@ -413,5 +429,3 @@ CREATE INDEX IF NOT EXISTS ix_fsrs_states_user_due_at
 
 CREATE INDEX IF NOT EXISTS ix_fsrs_states_flashcard_id
     ON fsrs_states(flashcard_id);
-
-COMMIT;

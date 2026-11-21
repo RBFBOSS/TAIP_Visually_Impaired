@@ -2,8 +2,9 @@ from uuid import uuid4
 
 import pytest
 
-from ai.groq_client import GeneratedFlashcard, GeneratedStudyMaterial
+from ai.groq_client import Citation, GeneratedFlashcard, GeneratedStudyMaterial
 from domain import InvalidDocumentError, ProcessingStatus
+from fakes import FakeStudyMaterialRepository
 from repositories import InMemoryDocumentRepository
 from services import (
     AiGenerationError,
@@ -26,11 +27,12 @@ def fake_read_pdf(filename: str, content: bytes) -> list[str]:
 def fake_generate_study_material(text: str) -> GeneratedStudyMaterial:
     return GeneratedStudyMaterial(
         summary="A short summary.",
+        summary_citation=Citation(page_number=1, source_excerpt="BASIC MATHEMATICS"),
         flashcards=[
             GeneratedFlashcard(
                 question="What is the topic?",
                 answer="Basic mathematics.",
-                sourcePage=1,
+                citations=[Citation(page_number=1, source_excerpt="BASIC MATHEMATICS")],
             )
         ],
     )
@@ -44,6 +46,7 @@ def make_service(
     return (
         DocumentService(
             repository=repository,
+            studyMaterialRepository=FakeStudyMaterialRepository(),
             pdf_reader=pdf_reader,
             study_material_generator=study_material_generator,
         ),
@@ -189,7 +192,7 @@ def test_generate_study_material_uses_default_ten_page_range_and_skips_empty_pag
     assert result.summary == "A short summary."
     assert len(result.flashcards) == 1
     assert result.flashcards[0].documentId == document.id
-    assert result.flashcards[0].sourcePage == 1
+    assert result.flashcards[0].citations[0].page_number == 1
     assert repository.find_by_id(document.id) is result
 
 
@@ -261,6 +264,10 @@ def test_generate_study_material_failure_keeps_previous_results():
 
     assert document.summary == previous_summary
     assert document.flashcards == previous_flashcards
+    assert len(service.studyMaterialRepository.find_flashcards(document.id)) == 1
+    saved_summary = service.studyMaterialRepository.find_summary(document.id)
+    assert saved_summary is not None
+    assert saved_summary[0] == previous_summary
 
 
 def test_load_flashcard_finds_saved_card_and_rejects_unknown_id():
@@ -273,3 +280,90 @@ def test_load_flashcard_finds_saved_card_and_rejects_unknown_id():
     assert service.loadFlashcard(flashcard.id) is flashcard
     with pytest.raises(FlashcardNotFoundError):
         service.loadFlashcard(uuid4())
+
+
+def test_generate_study_material_saves_the_generated_study_material_in_the_repository():
+    service, _ = make_service()
+    document = upload_one(service)
+    service.processDocument(document.id)
+
+    service.generateStudyMaterial(document.id)
+
+    saved_summary = service.studyMaterialRepository.find_summary(document.id)
+    assert saved_summary[0] == "A short summary."
+    assert saved_summary[1].page_number == 1
+    assert saved_summary[1].source_excerpt == "BASIC MATHEMATICS"
+
+    saved_flashcards = service.studyMaterialRepository.find_flashcards(document.id)
+    assert [flashcard.id for flashcard in saved_flashcards] == [
+        flashcard.id for flashcard in document.flashcards
+    ]
+    assert saved_flashcards[0].documentId == document.id
+    assert saved_flashcards[0].citations[0].page_number == 1
+
+
+def test_generate_study_material_replaces_the_previous_study_material():
+    service, _ = make_service()
+    document = upload_one(service)
+    service.processDocument(document.id)
+
+    service.generateStudyMaterial(document.id)
+    first_cards = service.studyMaterialRepository.find_flashcards(document.id)
+    first_summary = service.studyMaterialRepository.find_summary(document.id)
+    service.generateStudyMaterial(document.id)
+    second_cards = service.studyMaterialRepository.find_flashcards(document.id)
+    second_summary = service.studyMaterialRepository.find_summary(document.id)
+
+    assert len(second_cards) == 1
+    assert second_cards[0].id != first_cards[0].id
+    assert second_summary[1].id != first_summary[1].id
+
+
+def test_process_document_clears_the_saved_study_material():
+    service, _ = make_service()
+    document = upload_one(service)
+    service.processDocument(document.id)
+    service.generateStudyMaterial(document.id)
+    assert service.studyMaterialRepository.find_flashcards(document.id)
+    assert service.studyMaterialRepository.find_summary(document.id) is not None
+
+    service.processDocument(document.id)
+
+    assert service.studyMaterialRepository.find_flashcards(document.id) == []
+    assert service.studyMaterialRepository.find_summary(document.id) is None
+
+
+def test_delete_document_clears_the_saved_study_material():
+    service, _ = make_service()
+    document = upload_one(service)
+    service.processDocument(document.id)
+    service.generateStudyMaterial(document.id)
+
+    service.deleteDocument(document.id)
+
+    assert service.studyMaterialRepository.find_flashcards(document.id) == []
+    assert service.studyMaterialRepository.find_summary(document.id) is None
+
+
+def test_load_flashcards_reads_the_saved_flashcards_of_any_document():
+    service, _ = make_service()
+    document = upload_one(service)
+    service.processDocument(document.id)
+    service.generateStudyMaterial(document.id)
+
+    assert [f.id for f in service.loadFlashcards(document.id)] == [
+        f.id for f in document.flashcards
+    ]
+    assert service.loadFlashcards(uuid4()) == []
+
+
+def test_load_summary_reads_the_saved_summary_of_any_document():
+    service, _ = make_service()
+    document = upload_one(service)
+    service.processDocument(document.id)
+    service.generateStudyMaterial(document.id)
+
+    summary = service.loadSummary(document.id)
+    assert summary[0] == "A short summary."
+    assert summary[1].page_number == 1
+    assert service.loadSummary(uuid4()) is None

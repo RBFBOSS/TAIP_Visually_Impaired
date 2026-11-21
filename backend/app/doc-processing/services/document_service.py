@@ -4,7 +4,7 @@ from uuid import UUID
 
 from ai.groq_client import GeneratedStudyMaterial, generate_study_material
 from domain import Citation, Document, Flashcard, ProcessingStatus
-from repositories import DocumentRepository
+from repositories import DocumentRepository, StudyMaterialRepository
 from services.pdf_reader import read_pdf
 
 logger = logging.getLogger(__name__)
@@ -44,10 +44,12 @@ class DocumentService:
     def __init__(
         self,
         repository: DocumentRepository,
+        studyMaterialRepository: StudyMaterialRepository,
         pdf_reader: Callable[[str, bytes], List[str]] = read_pdf,
         study_material_generator: Callable[[str], GeneratedStudyMaterial] = generate_study_material,
     ) -> None:
         self.repository = repository
+        self.studyMaterialRepository = studyMaterialRepository
         self.pdf_reader = pdf_reader
         self.study_material_generator = study_material_generator
 
@@ -79,11 +81,13 @@ class DocumentService:
         """Deletes a document or raises when the requested document is missing."""
         self.loadDocument(id)
         self.repository.delete(id)
+        self.studyMaterialRepository.delete_for_document(id)
 
     def processDocument(self, id: UUID) -> Document:
         document = self.loadDocument(id)
         document.start_processing()
         self.repository.save(document)
+        self.studyMaterialRepository.delete_for_document(document.id)
 
         try:
             pages = [page.strip() for page in self.pdf_reader(document.filename, document.content)]
@@ -120,7 +124,7 @@ class DocumentService:
                     documentId=document.id,
                     question=card.question,
                     answer=card.answer,
-                    citation=Citation(**card.citation.model_dump()),
+                    citations=[Citation(**c.model_dump()) for c in card.citations],
                 )
                 for card in generated.flashcards
             ]
@@ -134,6 +138,12 @@ class DocumentService:
         document.summary_citation = Citation(**generated.summary_citation.model_dump())
         document.flashcards = flashcards
         self.repository.save(document)
+        self.studyMaterialRepository.save_study_material(
+            document.id,
+            document.summary,
+            document.summary_citation,
+            flashcards,
+        )
         return document
 
     def loadFlashcard(self, flashcardId: UUID) -> Flashcard:
@@ -142,6 +152,14 @@ class DocumentService:
                 if flashcard.id == flashcardId:
                     return flashcard
         raise FlashcardNotFoundError(f"Flashcard with ID {flashcardId} was not found.")
+
+    def loadFlashcards(self, documentId: UUID) -> List[Flashcard]:
+        """Returns the flashcards saved for a document, from the database."""
+        return self.studyMaterialRepository.find_flashcards(documentId)
+
+    def loadSummary(self, documentId: UUID) -> Optional[Tuple[str, Citation]]:
+        """Returns the (summary, citation) saved for a document, or None."""
+        return self.studyMaterialRepository.find_summary(documentId)
 
     def _select_source_text(
         self,

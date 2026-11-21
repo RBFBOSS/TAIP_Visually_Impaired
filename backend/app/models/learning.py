@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from app.models.documents import Document, DocumentSection
     from app.models.reviews import ReviewLog, FsrsState
 
+# am schimbat la unele coloane "nullable" True pentru ca nu am facut chestia de Decks si DocumentSection
 
 class Deck(Base):
     __tablename__ = "decks"
@@ -46,6 +47,12 @@ class Flashcard(Base):
     deck_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("decks.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    ##temporary column: flashcards are saved per document until decks exist
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         nullable=False,
         index=True,
     )
@@ -108,7 +115,7 @@ class Citation(Base):
     section_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("document_sections.id", ondelete="RESTRICT"),
-        nullable=False,
+        nullable=True,
         index=True,
     )
     page_number: Mapped[int | None] = mapped_column(Integer)

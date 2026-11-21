@@ -31,7 +31,7 @@ class Flashcard(BaseModel):
     documentId: UUID
     question: str
     answer: str
-    citation: Citation
+    citations: List[Citation]
 
 
 class Document(BaseModel):

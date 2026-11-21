@@ -21,7 +21,8 @@ Document status: `UPLOADED` → `PROCESSING` → `COMPLETED` or `FAILED`.
    ```
    GROQ_KEY=your-groq-api-key
    ```
-3. Start the service from this folder. It is the import root, because `doc-processing` is not a valid Python package name.
+3. Create the local PostgreSQL database and `backend/.env` as described in `backend/README.md` under "Local PostgreSQL setup". Generated summaries and flashcards are saved there.
+4. Start the service from this folder. It is the import root, because `doc-processing` is not a valid Python package name.
    ```bash
    cd backend/app/doc-processing
    uv run python main.py
@@ -59,7 +60,7 @@ curl -X DELETE http://127.0.0.1:8001/documents/<id>
 
 ## Limitations
 
-- **In-memory storage:** documents, summaries, and flashcards are lost when the service restarts.
+- **Documents stay in memory:** documents and extracted text are lost when the service restarts. Summaries and flashcards are saved in PostgreSQL: `GET /documents/summary/{id}` and `GET /documents/flashcards/{id}` read them from the database and keep working after a restart, and processing or deleting a document deletes the saved study material. `GET /documents/flashcard/{flashcardId}` only finds cards generated in the current run.
 - **Text-based PDFs only:** there is no OCR, so a scanned PDF without a text layer fails with "No readable text".
 - **Slow, blocking processing:** the request waits until the PDF is read. A 495-page book takes about 50–60 seconds and up to about 2 GB of RAM. Only one PDF is processed at a time.
 - **At most 15,000 characters per generate call** (about 10–13 pages). Groq's free tier allows 8,000 tokens per minute and 200,000 per day for this model, and one call must fit both the text and the reply. A larger range returns `422`. If `toPage` is missing, 10 pages are used.

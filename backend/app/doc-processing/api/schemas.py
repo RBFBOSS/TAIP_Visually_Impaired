@@ -30,7 +30,7 @@ class FlashcardResponse(BaseModel):
     documentId: UUID
     question: str
     answer: str
-    citation: Citation
+    citations: List[Citation]
 
 
 class StudyMaterialResponse(BaseModel):

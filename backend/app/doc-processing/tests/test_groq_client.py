@@ -1,17 +1,18 @@
 from types import SimpleNamespace
 
 import ai.groq_client as groq_client
-from ai.groq_client import GeneratedFlashcard, GeneratedStudyMaterial
+from ai.groq_client import Citation, GeneratedFlashcard, GeneratedStudyMaterial
 
 
 def test_groq_client_requests_strict_json_and_parses_study_material(monkeypatch):
     expected = GeneratedStudyMaterial(
         summary="A short summary.",
+        summary_citation=Citation(page_number=2, source_excerpt="Lesson text."),
         flashcards=[
             GeneratedFlashcard(
                 question="What is the topic?",
                 answer="Basic mathematics.",
-                sourcePage=2,
+                citations=[Citation(page_number=2, source_excerpt="Lesson text.")],
             )
         ],
     )
@@ -52,3 +53,5 @@ def test_groq_client_requests_strict_json_and_parses_study_material(monkeypatch)
     schema = response_format["json_schema"]["schema"]
     assert schema["additionalProperties"] is False
     assert schema["$defs"]["GeneratedFlashcard"]["additionalProperties"] is False
+    assert "citations" in schema["$defs"]["GeneratedFlashcard"]["properties"]
+    assert schema["$defs"]["Citation"]["additionalProperties"] is False

@@ -1,6 +1,7 @@
 from app.database.connection import Base
 from app.models.documents import (
     Document,
+    DocumentProcessingSummary,
     DocumentSection,
     GlobalSummary,
     SectionSummary,
@@ -14,6 +15,7 @@ __all__ = [
     "User",
     "StudentValidator",
     "Document",
+    "DocumentProcessingSummary",
     "DocumentSection",
     "GlobalSummary",
     "SectionSummary",

@@ -1,5 +1,6 @@
 import os
 
+from typing import List
 from groq import Groq
 from pydantic import BaseModel, ConfigDict
 
@@ -13,7 +14,7 @@ class GeneratedFlashcard(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
     question: str
     answer: str
-    citation: Citation
+    citations: List[Citation]
 
 
 class GeneratedStudyMaterial(BaseModel):

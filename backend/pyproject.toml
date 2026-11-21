@@ -8,8 +8,11 @@ dependencies = [
     "docling-slim[format-pdf]>=2.148.0",
     "fastapi>=0.162.0",
     "groq>=1.7.0",
+    "psycopg[binary]>=3.3.9",
+    "pydantic-settings>=2.16.2",
     "python-dotenv>=1.2.4",
     "python-multipart>=0.0.33",
+    "sqlalchemy>=2.1.9",
     "uvicorn[standard]>=0.54.0",
 ]
 

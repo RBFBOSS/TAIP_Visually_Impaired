@@ -3,8 +3,9 @@ from uuid import UUID, uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from ai.groq_client import GeneratedFlashcard, GeneratedStudyMaterial
+from ai.groq_client import Citation, GeneratedFlashcard, GeneratedStudyMaterial
 from api.dependencies import get_document_service
+from fakes import FakeStudyMaterialRepository
 from main import app
 from repositories import InMemoryDocumentRepository
 from services import DocumentService
@@ -21,21 +22,28 @@ def fake_read_pdf(filename: str, content: bytes) -> list[str]:
 def fake_generate_study_material(text: str) -> GeneratedStudyMaterial:
     return GeneratedStudyMaterial(
         summary="A short summary.",
+        summary_citation=Citation(page_number=1, source_excerpt="BASIC MATHEMATICS"),
         flashcards=[
             GeneratedFlashcard(
                 question="What is the topic?",
                 answer="Basic mathematics.",
-                sourcePage=1,
+                citations=[Citation(page_number=1, source_excerpt="BASIC MATHEMATICS")],
             )
         ],
     )
 
 
 @pytest.fixture
-def repository():
+def study_material_repository():
+    return FakeStudyMaterialRepository()
+
+
+@pytest.fixture
+def repository(study_material_repository):
     repository = InMemoryDocumentRepository()
     app.dependency_overrides[get_document_service] = lambda: DocumentService(
         repository=repository,
+        studyMaterialRepository=study_material_repository,
         pdf_reader=fake_read_pdf,
         study_material_generator=fake_generate_study_material,
     )
@@ -154,11 +162,12 @@ def test_get_and_process_unknown_document_return_not_found(client):
     assert client.post(f"/documents/{document_id}/process").status_code == 404
 
 
-def test_failed_processing_returns_422_and_persists_failed_status(client, repository):
+def test_failed_processing_returns_422_and_persists_failed_status(client, repository, study_material_repository):
     upload = client.post("/documents", files=[pdf_part("lesson.pdf")])
     document_id = upload.json()[0]["id"]
     app.dependency_overrides[get_document_service] = lambda: DocumentService(
         repository=repository,
+        studyMaterialRepository=study_material_repository,
         pdf_reader=lambda filename, content: [""],
         study_material_generator=fake_generate_study_material,
     )
@@ -174,7 +183,7 @@ def test_failed_processing_returns_422_and_persists_failed_status(client, reposi
     assert stored.json()["preview"] is None
 
 
-def test_generate_then_read_summary_flashcards_and_one_flashcard(client):
+def test_generate_then_read_summary_flashcards_and_one_flashcard(client, study_material_repository):
     document_id = upload_and_process(client)
 
     assert client.get(f"/documents/summary/{document_id}").status_code == 404
@@ -186,17 +195,30 @@ def test_generate_then_read_summary_flashcards_and_one_flashcard(client):
 
     assert generated.status_code == 200
     body = generated.json()
-    assert set(body) == {"documentId", "summary", "flashcards"}
+    assert set(body) == {"documentId", "summary", "summary_citation", "flashcards"}
     assert body["documentId"] == document_id
     assert body["summary"] == "A short summary."
+    assert body["summary_citation"]["page_number"] == 1
+    assert body["summary_citation"]["source_excerpt"] == "BASIC MATHEMATICS"
     assert len(body["flashcards"]) == 1
     card = body["flashcards"][0]
-    assert set(card) == {"id", "documentId", "question", "answer", "sourcePage"}
+    assert set(card) == {"id", "documentId", "question", "answer", "citations"}
     assert card["documentId"] == document_id
+    assert card["citations"][0]["page_number"] == 1
+
+    saved_flashcards = study_material_repository.find_flashcards(UUID(document_id))
+    assert [flashcard.id for flashcard in saved_flashcards] == [UUID(card["id"])]
+    saved_summary = study_material_repository.find_summary(UUID(document_id))
+    assert saved_summary[0] == "A short summary."
+    assert saved_summary[1].page_number == 1
 
     summary = client.get(f"/documents/summary/{document_id}")
     assert summary.status_code == 200
-    assert summary.json() == {"documentId": document_id, "summary": "A short summary."}
+    assert summary.json() == {
+        "documentId": document_id,
+        "summary": "A short summary.",
+        "summary_citation": body["summary_citation"],
+    }
 
     flashcards = client.get(f"/documents/flashcards/{document_id}")
     assert flashcards.status_code == 200
@@ -213,7 +235,7 @@ def test_generate_and_read_endpoints_return_404_for_unknown_ids(client):
 
     assert client.post(f"/documents/{document_id}/generate").status_code == 404
     assert client.get(f"/documents/summary/{document_id}").status_code == 404
-    assert client.get(f"/documents/flashcards/{document_id}").status_code == 404
+    assert client.get(f"/documents/flashcards/{document_id}").json() == []
     assert client.get(f"/documents/flashcard/{flashcard_id}").status_code == 404
 
 
@@ -231,7 +253,7 @@ def test_generate_rejects_unprocessed_document_and_invalid_range(client):
     assert invalid_range.status_code == 422
 
 
-def test_generate_returns_502_when_ai_provider_fails(client, repository):
+def test_generate_returns_502_when_ai_provider_fails(client, repository, study_material_repository):
     document_id = upload_and_process(client)
 
     def failing_generator(text: str):
@@ -239,6 +261,7 @@ def test_generate_returns_502_when_ai_provider_fails(client, repository):
 
     app.dependency_overrides[get_document_service] = lambda: DocumentService(
         repository=repository,
+        studyMaterialRepository=study_material_repository,
         pdf_reader=fake_read_pdf,
         study_material_generator=failing_generator,
     )
@@ -247,3 +270,58 @@ def test_generate_returns_502_when_ai_provider_fails(client, repository):
 
     assert response.status_code == 502
     assert "Could not generate" in response.json()["detail"]
+
+
+def test_generating_again_replaces_the_saved_flashcards(client):
+    document_id = upload_and_process(client)
+
+    client.post(f"/documents/{document_id}/generate")
+    first = client.get(f"/documents/flashcards/{document_id}").json()
+
+    client.post(f"/documents/{document_id}/generate")
+
+    second = client.get(f"/documents/flashcards/{document_id}").json()
+    assert len(second) == 1
+    assert second[0]["id"] != first[0]["id"]
+
+
+def test_reprocessing_or_deleting_a_document_clears_its_saved_study_material(client, study_material_repository):
+    document_id = upload_and_process(client)
+    client.post(f"/documents/{document_id}/generate")
+    assert len(study_material_repository.find_flashcards(UUID(document_id))) == 1
+
+    assert client.post(f"/documents/{document_id}/process").status_code == 200
+    assert client.get(f"/documents/flashcards/{document_id}").json() == []
+    assert client.get(f"/documents/summary/{document_id}").status_code == 404
+    assert study_material_repository.find_flashcards(UUID(document_id)) == []
+    assert study_material_repository.find_summary(UUID(document_id)) is None
+
+    client.post(f"/documents/{document_id}/generate")
+    assert client.delete(f"/documents/{document_id}").status_code == 204
+    assert client.get(f"/documents/flashcards/{document_id}").json() == []
+    assert client.get(f"/documents/summary/{document_id}").status_code == 404
+    assert study_material_repository.find_flashcards(UUID(document_id)) == []
+    assert study_material_repository.find_summary(UUID(document_id)) is None
+
+
+def test_study_material_stays_readable_after_the_document_store_is_replaced(client, study_material_repository):
+    document_id = upload_and_process(client)
+    client.post(f"/documents/{document_id}/generate")
+
+    # Simulate a service restart: the in-memory documents are gone, but the
+    # saved study material is not.
+    app.dependency_overrides[get_document_service] = lambda: DocumentService(
+        repository=InMemoryDocumentRepository(),
+        studyMaterialRepository=study_material_repository,
+        pdf_reader=fake_read_pdf,
+        study_material_generator=fake_generate_study_material,
+    )
+
+    assert client.get(f"/documents/{document_id}").status_code == 404
+    summary = client.get(f"/documents/summary/{document_id}")
+    assert summary.status_code == 200
+    assert summary.json()["summary"] == "A short summary."
+    assert summary.json()["summary_citation"]["page_number"] == 1
+    cards = client.get(f"/documents/flashcards/{document_id}").json()
+    assert len(cards) == 1
+    assert cards[0]["documentId"] == document_id

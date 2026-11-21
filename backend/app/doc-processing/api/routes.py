@@ -47,7 +47,7 @@ def _map_flashcard_to_response(flashcard: Flashcard) -> FlashcardResponse:
         documentId=flashcard.documentId,
         question=flashcard.question,
         answer=flashcard.answer,
-        citation=flashcard.citation.model_dump(),
+        citations=[c.model_dump() for c in flashcard.citations],
     )
 
 
@@ -152,16 +152,18 @@ def get_summary(
     document_id: UUID,
     service: DocumentService = Depends(get_document_service),
 ):
-    try:
-        document = service.loadDocument(document_id)
-    except DocumentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
-    if document.summary is None:
+    summary = service.loadSummary(document_id)
+    if summary is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No summary has been generated for document {document_id}.",
         )
-    return SummaryResponse(documentId=document.id, summary=document.summary, summary_citation=document.summary_citation.model_dump())
+    summary_text, summary_citation = summary
+    return SummaryResponse(
+        documentId=document_id,
+        summary=summary_text,
+        summary_citation=summary_citation.model_dump(),
+    )
 
 
 @router.get("/flashcards/{document_id}", response_model=List[FlashcardResponse])
@@ -169,11 +171,10 @@ def get_flashcards(
     document_id: UUID,
     service: DocumentService = Depends(get_document_service),
 ):
-    try:
-        document = service.loadDocument(document_id)
-    except DocumentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
-    return [_map_flashcard_to_response(flashcard) for flashcard in document.flashcards]
+    return [
+        _map_flashcard_to_response(flashcard)
+        for flashcard in service.loadFlashcards(document_id)
+    ]
 
 
 @router.get("/flashcard/{flashcardId}", response_model=FlashcardResponse)
