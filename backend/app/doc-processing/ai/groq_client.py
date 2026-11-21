@@ -3,19 +3,23 @@ import os
 from groq import Groq
 from pydantic import BaseModel, ConfigDict
 
+class Citation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    page_number: int
+    source_excerpt: str
+
 
 class GeneratedFlashcard(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
     question: str
     answer: str
-    sourcePage: int
+    citation: Citation
 
 
 class GeneratedStudyMaterial(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     summary: str
+    summary_citation: Citation
     flashcards: list[GeneratedFlashcard]
 
 
@@ -26,6 +30,8 @@ SYSTEM_PROMPT = (
     "symbols that are hard to read aloud. Then write up to 10 flashcards. Each "
     "flashcard has a short question, a short answer, and the number of the page "
     "it comes from. Pages are marked like '--- Page 12 ---'."
+    "For each material generated from the materials given, please generate a citation which represents the source of material generated"
+    "Citation be in format of Citation schema"
 )
 
 

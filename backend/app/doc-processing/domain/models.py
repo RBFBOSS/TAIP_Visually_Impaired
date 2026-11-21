@@ -20,12 +20,18 @@ class ProcessingStatus(str, Enum):
     FAILED = "FAILED"
 
 
+class Citation(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    page_number: int
+    source_excerpt: str
+
+
 class Flashcard(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     documentId: UUID
     question: str
     answer: str
-    sourcePage: int
+    citation: Citation
 
 
 class Document(BaseModel):
@@ -37,6 +43,7 @@ class Document(BaseModel):
     pageCount: Optional[int] = None
     pages: List[str] = Field(default_factory=list, repr=False, exclude=True)
     summary: Optional[str] = None
+    summary_citation: Optional[Citation] = None
     flashcards: List[Flashcard] = Field(default_factory=list)
 
     @property
@@ -50,6 +57,7 @@ class Document(BaseModel):
         self.pageCount = None
         self.pages = []
         self.summary = None
+        self.summary_citation = None
         self.flashcards = []
 
     def complete(self, pages: List[str]) -> None:
@@ -62,6 +70,7 @@ class Document(BaseModel):
         self.pageCount = None
         self.pages = []
         self.summary = None
+        self.summary_citation = None
         self.flashcards = []
 
     @classmethod

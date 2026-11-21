@@ -47,7 +47,7 @@ def _map_flashcard_to_response(flashcard: Flashcard) -> FlashcardResponse:
         documentId=flashcard.documentId,
         question=flashcard.question,
         answer=flashcard.answer,
-        sourcePage=flashcard.sourcePage,
+        citation=flashcard.citation.model_dump(),
     )
 
 
@@ -55,6 +55,7 @@ def _map_study_material_to_response(document: Document) -> StudyMaterialResponse
     return StudyMaterialResponse(
         documentId=document.id,
         summary=document.summary or "",
+        summary_citation=document.summary_citation.model_dump() if document.summary_citation else None,
         flashcards=[
             _map_flashcard_to_response(flashcard)
             for flashcard in document.flashcards
@@ -160,7 +161,7 @@ def get_summary(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No summary has been generated for document {document_id}.",
         )
-    return SummaryResponse(documentId=document.id, summary=document.summary)
+    return SummaryResponse(documentId=document.id, summary=document.summary, summary_citation=document.summary_citation.model_dump())
 
 
 @router.get("/flashcards/{document_id}", response_model=List[FlashcardResponse])

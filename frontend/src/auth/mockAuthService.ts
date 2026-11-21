@@ -11,7 +11,7 @@ const NETWORK_DELAY_MS = 300
 const SEEDED_ACCOUNT = {
   fullName: 'Test Student',
   email: 'student@example.com',
-  password: 'evis test password',
+  password: 'test',
 }
 
 type MockAccount = {

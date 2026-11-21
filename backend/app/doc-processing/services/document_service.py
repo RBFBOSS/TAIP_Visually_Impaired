@@ -3,7 +3,7 @@ from typing import Callable, List, Optional, Tuple
 from uuid import UUID
 
 from ai.groq_client import GeneratedStudyMaterial, generate_study_material
-from domain import Document, Flashcard, ProcessingStatus
+from domain import Citation, Document, Flashcard, ProcessingStatus
 from repositories import DocumentRepository
 from services.pdf_reader import read_pdf
 
@@ -120,7 +120,7 @@ class DocumentService:
                     documentId=document.id,
                     question=card.question,
                     answer=card.answer,
-                    sourcePage=card.sourcePage,
+                    citation=Citation(**card.citation.model_dump()),
                 )
                 for card in generated.flashcards
             ]
@@ -131,6 +131,7 @@ class DocumentService:
             ) from exc
 
         document.summary = generated.summary
+        document.summary_citation = Citation(**generated.summary_citation.model_dump())
         document.flashcards = flashcards
         self.repository.save(document)
         return document
