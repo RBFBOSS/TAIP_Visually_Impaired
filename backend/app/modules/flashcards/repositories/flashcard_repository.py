@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from uuid import UUID
 
-from app.flashcards.domain import Flashcard
+from app.modules.flashcards.domain import Flashcard
 
 
 class FlashcardRepository(ABC):

@@ -3,22 +3,22 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.aspects.security import AccessDeniedError
-from app.flashcards.api.dependencies import (
+from app.modules.flashcards.api.dependencies import (
     get_current_user_role,
     get_deck_service,
     get_flashcard_service,
 )
-from app.flashcards.api.schemas import (
+from app.modules.flashcards.api.schemas import (
     BulkApprovalResponse,
     CitationResponse,
     CreateDraftRequest,
     FlashcardEditRequest,
     FlashcardResponse,
 )
-from app.flashcards.domain.models import Flashcard, GeneratedFlashcard
-from app.flashcards.services.citation_validator import InvalidCitationError
-from app.flashcards.services.deck_service import DeckNotFoundError, DeckService
-from app.flashcards.services.flashcard_service import (
+from app.modules.flashcards.domain.models import Flashcard, GeneratedFlashcard
+from app.modules.flashcards.services.citation_validator import InvalidCitationError
+from app.modules.flashcards.services.deck_service import DeckNotFoundError, DeckService
+from app.modules.flashcards.services.flashcard_service import (
     FlashcardNotFoundError,
     FlashcardService,
     UnauthorizedApprovalError,

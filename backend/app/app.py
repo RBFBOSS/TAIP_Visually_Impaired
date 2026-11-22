@@ -10,9 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client
 
 from app.database.base import check_database_connection
-from app.flashcards.api.routes import router as flashcards_router
-from app.pdf_upload.api.routes import router as pdf_upload_router
-from app.pdf_upload.repositories.supabase_storage import SupabasePdfStorageRepository
+from app.modules.flashcards.api.routes import router as flashcards_router
+from app.modules.pdf_upload.api.routes import router as pdf_upload_router
+from app.modules.pdf_upload.repositories.supabase_storage import SupabasePdfStorageRepository
 
 
 @asynccontextmanager

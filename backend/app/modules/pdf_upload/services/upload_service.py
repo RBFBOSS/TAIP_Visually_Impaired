@@ -8,17 +8,17 @@ from sqlalchemy.orm import Session
 from app.dto.document_dto import DocumentUploadResultDTO
 from app.models.documents import Document
 from app.models.enums import ProcessingStatus
-from app.pdf_upload.helpers.constants import (
+from app.modules.pdf_upload.helpers.constants import (
     MAX_PDF_SIZE_BYTES,
     PDF_MAGIC_HEADER,
 )
-from app.pdf_upload.helpers.exceptions import (
+from app.modules.pdf_upload.helpers.exceptions import (
     FileTooLargeError,
     InvalidPdfError,
     StorageUploadError,
 )
-from app.pdf_upload.repositories.document_repository import DocumentRepository
-from app.pdf_upload.repositories.supabase_storage import ObjectStorageRepository
+from app.modules.pdf_upload.repositories.document_repository import DocumentRepository
+from app.modules.pdf_upload.repositories.supabase_storage import ObjectStorageRepository
 
 _CHUNK_SIZE_BYTES = 64 * 1024
 

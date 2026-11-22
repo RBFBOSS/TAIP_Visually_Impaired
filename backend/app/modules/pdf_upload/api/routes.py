@@ -3,19 +3,19 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 
-from app.pdf_upload.api.dependencies import (
+from app.modules.pdf_upload.api.dependencies import (
     CurrentUser,
     get_current_user,
     get_upload_service,
     validate_pdf_upload,
 )
-from app.pdf_upload.api.schemas import DocumentUploadResponse
-from app.pdf_upload.helpers.exceptions import (
+from app.modules.pdf_upload.api.schemas import DocumentUploadResponse
+from app.modules.pdf_upload.helpers.exceptions import (
     FileTooLargeError,
     InvalidPdfError,
     StorageUploadError,
 )
-from app.pdf_upload.services.upload_service import DocumentUploadService
+from app.modules.pdf_upload.services.upload_service import DocumentUploadService
 
 logger = logging.getLogger(__name__)
 

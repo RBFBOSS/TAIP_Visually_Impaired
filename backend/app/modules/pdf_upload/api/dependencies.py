@@ -4,9 +4,9 @@ from fastapi import Depends, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.pdf_upload.helpers.constants import ALLOWED_PDF_CONTENT_TYPES, MAX_PDF_SIZE_BYTES
-from app.pdf_upload.repositories.document_repository import DocumentRepository
-from app.pdf_upload.services.upload_service import DocumentUploadService
+from app.modules.pdf_upload.helpers.constants import ALLOWED_PDF_CONTENT_TYPES, MAX_PDF_SIZE_BYTES
+from app.modules.pdf_upload.repositories.document_repository import DocumentRepository
+from app.modules.pdf_upload.services.upload_service import DocumentUploadService
 
 DEV_DEFAULT_USER_ID = UUID("00000000-0000-0000-0000-000000000001")
 

@@ -2,11 +2,11 @@ from typing import Dict
 from uuid import UUID
 from fastapi import Header, HTTPException, status
 
-from app.flashcards.domain import Deck
-from app.flashcards.repositories import InMemoryFlashcardRepository
-from app.flashcards.services import CitationValidator
-from app.flashcards.services import DeckService
-from app.flashcards.services import FlashcardService
+from app.modules.flashcards.domain import Deck
+from app.modules.flashcards.repositories import InMemoryFlashcardRepository
+from app.modules.flashcards.services import CitationValidator
+from app.modules.flashcards.services import DeckService
+from app.modules.flashcards.services import FlashcardService
 
 _shared_flashcard_repository = InMemoryFlashcardRepository()
 _shared_decks_storage: Dict[UUID, Deck] = {}

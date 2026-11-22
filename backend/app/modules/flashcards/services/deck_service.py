@@ -1,8 +1,8 @@
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from app.flashcards.domain import ApprovalStatus, Deck, Flashcard
-from app.flashcards.repositories import FlashcardRepository
+from app.modules.flashcards.domain import ApprovalStatus, Deck, Flashcard
+from app.modules.flashcards.repositories import FlashcardRepository
 
 
 class DeckNotFoundError(Exception):

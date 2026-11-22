@@ -3,7 +3,7 @@ from typing import Protocol
 
 from supabase import Client
 
-from app.pdf_upload.helpers.exceptions import StorageUploadError
+from app.modules.pdf_upload.helpers.exceptions import StorageUploadError
 
 
 class ObjectStorageRepository(Protocol):

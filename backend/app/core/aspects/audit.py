@@ -1,7 +1,8 @@
-import logging
-import time
 from typing import Any, Optional
 import aspectlib
+import logging
+import time
+
 
 logger = logging.getLogger("app.audit")
 logger.setLevel(logging.INFO)
@@ -29,7 +30,6 @@ def audit_action(action_name: Optional[str] = None):
         start_time = time.perf_counter()
 
         try:
-            # Yield passes control to the actual method execution
             result = yield
             elapsed = time.perf_counter() - start_time
             logger.info(

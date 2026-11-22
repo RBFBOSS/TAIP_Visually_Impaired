@@ -1,6 +1,6 @@
 ## Endpoint testing using Swagger UI
 - În `backend/`: python main.py
-- În browser:    http://127.0.0.1:8000/docs
+- În browser:    localhost:8000/docs
 
 ## venv activation on Windows
 - cd backend

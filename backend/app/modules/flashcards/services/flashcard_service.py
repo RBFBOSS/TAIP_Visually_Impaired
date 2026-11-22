@@ -1,13 +1,13 @@
 from typing import List, Optional
 from uuid import UUID
 
-from app.flashcards.domain import (
+from app.modules.flashcards.domain import (
     Citation,
     Flashcard,
     GeneratedFlashcard,
 )
-from app.flashcards.repositories import FlashcardRepository
-from app.flashcards.services import CitationValidator
+from app.modules.flashcards.repositories import FlashcardRepository
+from app.modules.flashcards.services import CitationValidator
 
 
 class FlashcardNotFoundError(Exception):

@@ -3,7 +3,7 @@ from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
 
-from app.flashcards.domain.models import ApprovalStatus
+from app.modules.flashcards.domain.models import ApprovalStatus
 
 
 class CitationResponse(BaseModel):

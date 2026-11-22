@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.flashcards.domain import Citation, Flashcard
+from app.modules.flashcards.domain import Citation, Flashcard
 
 
 class InvalidCitationError(Exception):

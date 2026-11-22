@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models.documents import Document
-from app.pdf_upload.helpers.exceptions import MetadataPersistenceError
+from app.modules.pdf_upload.helpers.exceptions import MetadataPersistenceError
 
 
 class DocumentRepository:

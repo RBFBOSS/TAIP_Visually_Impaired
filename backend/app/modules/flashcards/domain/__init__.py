@@ -1,4 +1,4 @@
-from app.flashcards.domain.models import (
+from app.modules.flashcards.domain.models import (
     ApprovalStatus,
     Citation,
     Deck,
