@@ -8,4 +8,11 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    proxy: {
+      // The study material viewer reads the processing service on port 8001.
+      '/documents/summary': 'http://127.0.0.1:8001',
+      '/documents/flashcards': 'http://127.0.0.1:8001',
+    },
+  },
 })

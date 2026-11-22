@@ -2,6 +2,7 @@
 import { useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../auth/useAuth'
 import SuccessBanner from '../components/SuccessBanner'
+import StudyMaterialViewer from '../components/StudyMaterialViewer'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useRouteFocus } from '../hooks/useRouteFocus'
 
@@ -343,6 +344,8 @@ export default function DocumentsPage() {
           </ul>
         )}
       </section>
+
+      <StudyMaterialViewer />
 
       <button
         type="button"
