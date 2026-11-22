@@ -1,7 +1,11 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from sqlalchemy import URL
+
 
 class Settings(BaseSettings):
+    """Database configuration loaded from environment variables."""
+
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_NAME: str
@@ -18,7 +22,7 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:
-        from sqlalchemy import URL
+        """Build the SQLAlchemy connection URL for PostgreSQL using the `psycopg` driver."""
 
         return URL.create(
             drivername="postgresql+psycopg",
