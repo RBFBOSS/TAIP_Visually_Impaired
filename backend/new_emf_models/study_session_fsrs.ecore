@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="studysessionsfsrs" nsURI="http://www.example.org/studysessionsfsrs" nsPrefix="ssf">
+  <eClassifiers xsi:type="ecore:EEnum" name="RecallRating">
+    <eLiterals name="AGAIN" value="0"/>
+    <eLiterals name="HARD" value="1"/>
+    <eLiterals name="GOOD" value="2"/>
+    <eLiterals name="EASY" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SessionStatus">
+    <eLiterals name="ACTIVE" value="0"/>
+    <eLiterals name="COMPLETED" value="1"/>
+    <eLiterals name="INTERRUPTED" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="FSRSCardState">
+    <eLiterals name="NEW" value="0"/>
+    <eLiterals name="LEARNING" value="1"/>
+    <eLiterals name="REVIEW" value="2"/>
+    <eLiterals name="RELEARNING" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="FeedbackLevel">
+    <eLiterals name="TASK" value="0"/>
+    <eLiterals name="PROCESS" value="1"/>
+    <eLiterals name="SELF_REGULATION" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FlashcardRef">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="question" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="answer" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="User">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="role" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sessions" upperBound="-1" eType="#//ReviewSession" eOpposite="#//ReviewSession/user"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fsrsStates" upperBound="-1" eType="#//FSRSState" eOpposite="#//FSRSState/user"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReviewSession">
+    <eOperations name="endSession"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="startedAt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="endedAt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="status" lowerBound="1" eType="#//SessionStatus"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user" lowerBound="1" eType="#//User" eOpposite="#//User/sessions"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="logs" upperBound="-1" eType="#//ReviewLog" containment="true" eOpposite="#//ReviewLog/session"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReviewLog">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rating" lowerBound="1" eType="#//RecallRating"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="responseLatencyMs" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reviewedAt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="session" lowerBound="1" eType="#//ReviewSession" eOpposite="#//ReviewSession/logs"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="flashcard" lowerBound="1" eType="#//FlashcardRef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FSRSState">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" lowerBound="1" eType="#//FSRSCardState"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stability" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="difficulty" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dueAt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastReview" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="repetitions" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lapses" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user" lowerBound="1" eType="#//User" eOpposite="#//User/fsrsStates"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="flashcard" lowerBound="1" eType="#//FlashcardRef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProgressReport">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="totalReviews" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dueCards" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="averageLatencyMs" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="generatedAt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user" lowerBound="1" eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="feedbackItems" upperBound="-1" eType="#//LearningFeedback" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LearningFeedback">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" lowerBound="1" eType="#//FeedbackLevel"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="message" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+</ecore:EPackage>
